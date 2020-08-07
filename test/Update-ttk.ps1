@@ -1,6 +1,10 @@
-Write-Host "Run this script from the directory in which its located"
+Write-Host "Script may be executed with any current directory. It will still place the TTK in the correct location."
+
+$MyInvocation.MyCommand.Path
+$script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+
 # Define Variables
-$ttk_folder = '.\test-ttk'
+$ttk_folder = $script:IncludeDir
 $ttk_asset_path = "$env:temp\AzTemplateToolKit.zip"
 
 # Download TTK

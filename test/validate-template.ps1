@@ -3,20 +3,36 @@ Write-Host "So, if validating the lansa template in .\azure-quickstart-templates
 Write-Host "change to that directory and run this test as ..\test\validate-template.ps1"
 Write-Host "Note that an error is displayed 'Import-Json : Invalid JSON primitive: .'. This may be ignored. Just pay attention to the final result"
 
-$MyInvocation.MyCommand.Path
+Write-Host "Script Path = $($MyInvocation.MyCommand.Path)"
 $script:IncludeDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+Write-Host "Script Directory =  $($script:IncludeDir)"
 
-$TemplatePath = Get-Location
-# Run Best Practice Tests
-Import-Module $script:IncludeDir/test-ttk/arm-ttk/arm-ttk.psd1 -Verbose
-$testOutput = @(Test-AzTemplate -TemplatePath $TemplatePath)
+try {
+    $TemplatePath = Get-Location
+    Write-Host "Template Directory = $($TemplatePath.Path)"
 
-$testOutput
+    # Run Best Practice Tests
+    Import-Module $script:IncludeDir/arm-ttk/arm-ttk.psd1 -Verbose
+    $TestResults = @(Test-AzTemplate -TemplatePath $TemplatePath.path)
 
-if ($testOutput | ? {$_.Errors }) {
+    $TestResults
+
+    if ($TestResults | ? {$_.Errors }) {
+        # This code does not seem to be informative. May be useful in some circumstances. Developer to run it themselves as necessary.
+        # When a need is found then maybe it becomes an option when running the script
+        # $TestFailures =  $TestResults | Where-Object { -not $_.Passed }
+        # $FailureTargetObjects = $TestFailures |
+        #     Select-Object -ExpandProperty Errors |
+        #     Select-Object -ExpandProperty TargetObject
+        # $FailureTargetObjects
+        Write-Host "Validation failed"
+        exit 1
+    }
+} catch {
+    $_
     Write-Host "Validation failed"
     exit 1
-} else {
-    Write-Host "Validation succeeded"
-   exit 0
 }
+
+Write-Host "Validation succeeded"
+exit 0
