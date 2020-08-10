@@ -342,16 +342,13 @@
    },
    "variables": {
       "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
+      "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
       "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
-      "customNamingInfix": "[if(variables('isCustomImage'), variables('namingInfix'), 'dummyNamingInfix')]",
-      "skuNamingInfix": "[if(variables('isCustomImage'), 'dummyNamingInfix', variables('namingInfix'))]",
       "longNamingInfix": "[toLower(parameters('stackName'))]",
       "dblongNamingInfix": "[toLower(concat('db',parameters('stackName')))]",
       "aglongNamingInfix": "[toLower(concat('ag',parameters('stackName')))]",
       "dbvmssName": "[toLower(substring(concat('db',parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
-      "dbvmssCustomName": "[if(variables('isCustomImage'), variables('dbvmssName'), 'dummydbvmssName')]",
-      "dbvmssSkuName": "[if(variables('isCustomImage'), 'dummydbvmssName', variables('dbvmssName'))]",
       "addressPrefix": "10.0.0.0/16",
       "subnetPrefix": "10.0.0.0/24",
       "virtualNetworkName": "[concat(variables('namingInfix'), 'vnet')]",
@@ -424,7 +421,11 @@
          "id": "[parameters('imageId')]"
       },
       "imageReference": "[if(variables('isCustomImage'), variables('imageResourceId'), variables('osType'))]",
-      "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
+      "imagePlan" : {
+         "name": "[variables('imageSKU')]",
+         "product": "[variables('imageOfferName')]",
+         "publisher": "[variables('imagePublisher')]"
+      },
       "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
       "gitRepo": "https://raw.githubusercontent.com/robe070/cookbooks/",
       "gitRefreshName": "git-pull.ps1",
@@ -627,9 +628,8 @@
          }
       },
       {
-         "condition": "[not(variables('isCustomImage'))]",
          "type": "Microsoft.Compute/virtualMachineScaleSets",
-         "name": "[variables('dbvmssSkuName')]",
+         "name": "[variables('dbvmssName')]",
          "location": "[parameters('location')]",
          "apiVersion": "2019-07-01",
          "dependsOn": [
@@ -644,11 +644,7 @@
             "tier": "Standard",
             "capacity": 1
          },
-         "plan": {
-            "name": "[variables('imageSKU')]",
-            "product": "[variables('imageOfferName')]",
-            "publisher": "[variables('imagePublisher')]"
-         },
+         "plan": "[if(variables('isCustomImage'), json('null'), variables('imagePlan'))]",
          "properties": {
             "overprovision": false,
             "upgradePolicy": {
@@ -663,7 +659,7 @@
                   "imageReference": "[variables('imageReference')]"
                },
                "osProfile": {
-                  "computerNamePrefix": "[variables('dbvmssSkuName')]",
+                  "computerNamePrefix": "[variables('dbvmssName')]",
                   "adminUsername": "[parameters('adminUsername')]",
                   "adminPassword": "[parameters('adminPassword')]",
                   "windowsConfiguration": {
@@ -719,9 +715,8 @@
          }
       },
       {
-         "condition": "[not(variables('isCustomImage'))]",
          "type": "Microsoft.Compute/virtualMachineScaleSets",
-         "name": "[variables('skuNamingInfix')]",
+         "name": "[variables('namingInfix')]",
          "location": "[parameters('location')]",
          "apiVersion": "2019-07-01",
          "dependsOn": [
@@ -729,18 +724,14 @@
             "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
             "[concat('Microsoft.Sql/servers/', variables('sqlserverName'))]",
             "[concat('Microsoft.Sql/servers/', variables('sqlserverName'), '/databases/', parameters('databaseName'))]",
-            "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('dbvmssSkuName'))]"
+            "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('dbvmssName'))]"
          ],
          "sku": {
             "name": "[parameters('virtualMachineSize')]",
             "tier": "Standard",
             "capacity": "[parameters('minimumInstanceCount')]"
          },
-         "plan": {
-            "name": "[variables('imageSKU')]",
-            "product": "[variables('imageOfferName')]",
-            "publisher": "[variables('imagePublisher')]"
-         },
+         "plan": "[if(variables('isCustomImage'), json('null'), variables('imagePlan'))]",
          "properties": {
             "overprovision": false,
             "upgradePolicy": {
@@ -755,191 +746,7 @@
                   "imageReference": "[variables('imageReference')]"
                },
                "osProfile": {
-                  "computerNamePrefix": "[variables('skuNamingInfix')]",
-                  "adminUsername": "[parameters('adminUsername')]",
-                  "adminPassword": "[parameters('adminPassword')]",
-                  "windowsConfiguration": {
-                     "provisionVMAgent": true
-                  }
-               },
-               "networkProfile": {
-                  "networkInterfaceConfigurations": [
-                     {
-                        "name": "[variables('nicName')]",
-                        "properties": {
-                           "primary": true,
-                           "ipConfigurations": [
-                              {
-                                 "name": "[variables('ipConfigName')]",
-                                 "properties": {
-                                    "subnet": {
-                                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
-                                     },
-                                     "loadBalancerBackendAddressPools": [
-                                        {
-                                           "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('bePoolName'))]"
-                                        }
-                                     ],
-                                    "loadBalancerInboundNatPools": [
-                                       {
-                                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', variables('loadBalancerName'), variables('natPoolName'))]"
-                                       }
-                                    ],
-                                    "applicationGatewayBackendAddressPools": [
-                                       {
-                                          "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('agName'), variables('agBackendAddressPoolName'))]"
-                                       }
-                                    ]
-                                 }
-                              }
-                           ]
-                        }
-                     }
-                  ]
-               },
-               "extensionProfile": {
-                  "extensions": [
-                     {
-                        "name": "MainInstall",
-                        "properties": {
-                           "publisher": "Microsoft.Compute",
-                           "type": "CustomScriptExtension",
-                           "typeHandlerVersion": "1.9",
-                           "autoUpgradeMinorVersion": true,
-                           "forceUpdateTag": "[concat( parameters('installMSI'),parameters('updateMSI'),parameters('triggerWebConfig'),parameters('UninstallMSI'),parameters('fixLicense'), parameters('trace'), parameters('gitBranch') )]",
-                           "settings": {
-                              "fileUris": [ "[variables('gitRefreshUri')]" ]
-                           },
-                           "protectedSettings": {
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ';popd;', 'pushd;c:\\lansa\\scripts\\azure-custom-script.ps1 ', '-SUDB \"0\" -server_name ', variables('Q'),  if(variables('isNewDatabase'), reference(variables('sqlserverName')).fullyQualifiedDomainName, parameters('databaseServerName')), variables('Q'), ' -DBUT ', variables('Q'), parameters('databaseType'), variables('Q'),  ' -dbname ', variables('Q'),  parameters('databaseName'), variables('Q'), ' -dbuser ', variables('Q'),  parameters('databaseLogin'), variables('Q'), ' -dbpassword ', variables('Q'),  parameters('databaseLoginPassword'), variables('Q'), ' -webuser ', variables('Q'),  parameters('webUsername'), variables('Q'), ' -webpassword ', variables('Q'),  parameters('webPassword'), variables('Q'), ' -MSIuri ', variables('Q'),  parameters('msiURL'), variables('Q'),  ' -maxconnections ', variables('Q'),  parameters('webServerMaxConnect'), variables('Q'), ' -trace ', variables('Q'),  parameters('trace'), variables('Q'), ' -installMSI ', variables('Q'),  parameters('installMSI'), variables('Q'), ' -updateMSI ', variables('Q'),  parameters('updateMSI'), variables('Q'),' -triggerWebConfig ', variables('Q'),  parameters('triggerWebConfig'), variables('Q'), ' -UninstallMSI ', variables('Q'),  parameters('UninstallMSI'), variables('Q'), ' -fixLicense ', variables('Q'),  parameters('fixLicense'), variables('Q'),  ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE}; exit 0;popd;}\"')]"
-                           }
-                        }
-                     }
-                  ]
-               }
-            }
-         }
-      },
-      {
-         "condition": "[variables('isCustomImage')]",
-         "type": "Microsoft.Compute/virtualMachineScaleSets",
-         "name": "[variables('dbvmssCustomName')]",
-         "location": "[parameters('location')]",
-         "apiVersion": "2019-07-01",
-         "dependsOn": [
-            "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
-            "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-            "[concat('Microsoft.Sql/servers/', variables('sqlserverName'))]",
-            "[concat('Microsoft.Sql/servers/', variables('sqlserverName'), '/databases/', parameters('databaseName'))]",
-            "[concat('Microsoft.Network/applicationGateways/', variables('agName'))]"
-         ],
-         "sku": {
-            "name": "[parameters('dbVirtualMachineSize')]",
-            "tier": "Standard",
-            "capacity": 1
-         },
-         "properties": {
-            "overprovision": false,
-            "upgradePolicy": {
-               "mode": "Automatic"
-            },
-            "virtualMachineProfile": {
-               "storageProfile": {
-                  "osDisk": {
-                     "caching": "ReadOnly",
-                     "createOption": "FromImage"
-                  },
-                  "imageReference": "[variables('imageReference')]"
-               },
-               "osProfile": {
-                  "computerNamePrefix": "[variables('dbvmssCustomName')]",
-                  "adminUsername": "[parameters('adminUsername')]",
-                  "adminPassword": "[parameters('adminPassword')]",
-                  "windowsConfiguration": {
-                     "provisionVMAgent": true
-                  }
-               },
-               "networkProfile": {
-                  "networkInterfaceConfigurations": [
-                     {
-                        "name": "[concat('db', variables('nicName'))]",
-                        "properties": {
-                           "primary": true,
-                           "ipConfigurations": [
-                              {
-                                 "name": "[concat( 'db',variables('ipConfigName'))]",
-                                 "properties": {
-                                    "subnet": {
-                                       "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
-                                    },
-                                    "loadBalancerBackendAddressPools": [
-                                       {
-                                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('dbloadBalancerName'), variables('dbbePoolName'))]"
-                                       }
-                                    ]
-                                 }
-                              }
-                           ]
-                        }
-                     }
-                  ]
-               },
-               "extensionProfile": {
-                  "extensions": [
-                     {
-                        "name": "FirstInstall",
-                        "properties": {
-                           "publisher": "Microsoft.Compute",
-                           "type": "CustomScriptExtension",
-                           "typeHandlerVersion": "1.9",
-                           "autoUpgradeMinorVersion": true,
-                           "forceUpdateTag": "[concat( parameters('installMSI'),parameters('updateMSI'),parameters('triggerWebConfig'),parameters('UninstallMSI'),parameters('fixLicense'), parameters('trace'), parameters('gitBranch') )]",
-                           "settings": {
-                              "fileUris": [ "[variables('gitRefreshUri')]" ]
-                           },
-                           "protectedSettings": {
-                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;./',variables('gitRefreshName'), ' ', parameters('gitBranch'), ';popd;', 'pushd;c:\\lansa\\scripts\\azure-custom-script.ps1 ', '-server_name ',variables('Q'), if(variables('isNewDatabase'), reference(variables('sqlserverName')).fullyQualifiedDomainName, parameters('databaseServerName')), variables('Q'), ' -DBUT ', variables('Q'), parameters('databaseType'), variables('Q'), ' -dbname ', variables('Q'), parameters('databaseName'), variables('Q'), ' -dbuser ', variables('Q'), parameters('databaseLogin'), variables('Q'), ' -dbpassword ', variables('Q'),  parameters('databaseLoginPassword'), variables('Q'), ' -webuser ', variables('Q'),  parameters('webUsername'), variables('Q'), ' -webpassword ', variables('Q'),  parameters('webPassword'), variables('Q'), ' -MSIuri ', variables('Q'),  parameters('msiURL'), variables('Q'),  ' -maxconnections ', variables('Q'),  parameters('webServerMaxConnect'), variables('Q'), ' -trace ', variables('Q'),  parameters('trace'), variables('Q'), ' -installMSI ', variables('Q'),  parameters('installMSI'), variables('Q'), ' -updateMSI ', variables('Q'),  parameters('updateMSI'), variables('Q'),' -triggerWebConfig ', variables('Q'),  parameters('triggerWebConfig'), variables('Q'),' -UninstallMSI ', variables('Q'),  parameters('UninstallMSI'), variables('Q'), ' -fixLicense ', variables('Q'),  parameters('fixLicense'), variables('Q'), ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE}; exit 0;popd;}\"')]"
-                           }
-                        }
-                     }
-                  ]
-               }
-            }
-         }
-      },
-      {
-         "condition": "[variables('isCustomImage')]",
-         "type": "Microsoft.Compute/virtualMachineScaleSets",
-         "name": "[variables('customNamingInfix')]",
-         "location": "[parameters('location')]",
-         "apiVersion": "2019-07-01",
-         "dependsOn": [
-            "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
-            "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-            "[concat('Microsoft.Sql/servers/', variables('sqlserverName'))]",
-            "[concat('Microsoft.Sql/servers/', variables('sqlserverName'), '/databases/', parameters('databaseName'))]",
-            "[concat('Microsoft.Compute/virtualMachineScaleSets/', variables('dbvmssCustomName'))]"
-         ],
-         "sku": {
-            "name": "[parameters('virtualMachineSize')]",
-            "tier": "Standard",
-            "capacity": "[parameters('minimumInstanceCount')]"
-         },
-         "properties": {
-            "overprovision": false,
-            "upgradePolicy": {
-               "mode": "Automatic"
-            },
-            "virtualMachineProfile": {
-               "storageProfile": {
-                  "osDisk": {
-                     "caching": "ReadOnly",
-                     "createOption": "FromImage"
-                  },
-                  "imageReference": "[variables('imageReference')]"
-               },
-               "osProfile": {
-                  "computerNamePrefix": "[variables('customNamingInfix')]",
+                  "computerNamePrefix": "[variables('namingInfix')]",
                   "adminUsername": "[parameters('adminUsername')]",
                   "adminPassword": "[parameters('adminPassword')]",
                   "windowsConfiguration": {
