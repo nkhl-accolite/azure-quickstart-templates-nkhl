@@ -1026,7 +1026,7 @@
          "tags": {
             "displayName": "SqlServer"
          },
-         "apiVersion": "2019-12-01-preview",
+         "apiVersion": "2020-02-02-preview",
          "properties": {
             "administratorLogin": "[parameters('databaseLogin')]",
             "administratorLoginPassword": "[parameters('databaseLoginPassword')]",
@@ -1041,7 +1041,7 @@
                "tags": {
                   "displayName": "Database"
                },
-               "apiVersion": "2019-12-01-preview",
+               "apiVersion": "2020-02-02-preview",
                "dependsOn": [
                   "[variables('sqlserverName')]"
                ],
@@ -1055,7 +1055,7 @@
             {
                "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
                "type": "firewallRules",
-               "apiVersion": "2019-12-01-preview",
+               "apiVersion": "2020-02-02-preview",
                "dependsOn": [
                   "[variables('sqlserverName')]"
                ],
