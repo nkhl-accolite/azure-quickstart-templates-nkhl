@@ -22,7 +22,9 @@
                         "label": "Stack Name",
                         "toolTip": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended. Some identifiers use precisely 9 characters from this name and so it can be useful to use exactly 9. The template pads it out or truncates it as necessary to make it 9 characters long where required.",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         }
                     },
                     {
@@ -31,7 +33,9 @@
                         "label": "MSI URL",
                         "toolTip": "URL of the LANSA MSI which will be installed on each virtual machine.",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         }
                     },
                     {
@@ -41,7 +45,8 @@
                         "toolTip": "Base 64 encoded String representing the SSL certificate",
                         "constraints": {
                             "required": true,
-                            "validationMessage": "The certificate field cannot be empty."
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         }
                     },
                     {
@@ -53,7 +58,7 @@
                         },
                         "toolTip": "SSL certificate password",
                         "options": {
-                            "hideConfirmation": true
+                            "hideConfirmation": false
                         },
                         "constraints": {
                             "required": true
@@ -66,7 +71,9 @@
                         "label": "Admin Username",
                         "toolTip": "Admin username on all VMs",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         }
                     },
                     {
@@ -78,7 +85,7 @@
                         },
                         "toolTip": "Admin password on all VMs",
                         "options": {
-                            "hideConfirmation": true
+                            "hideConfirmation": false
                         },
                         "constraints": {
                             "required": true
@@ -90,7 +97,9 @@
                         "label": "Web Username",
                         "toolTip": "Web Server username on all VMs. This should be different from Admin Username",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         }
                     },
                     {
@@ -102,7 +111,7 @@
                         },
                         "toolTip": "Web Server password on all VMs",
                         "options": {
-                            "hideConfirmation": true
+                            "hideConfirmation": false
                         },
                         "constraints": {
                             "required": true
@@ -114,7 +123,9 @@
                         "label": "Database Login",
                         "toolTip": "The admin user of the Azure SQL Database",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         }
                     },
                     {
@@ -126,7 +137,7 @@
                         },
                         "toolTip": "The password of the admin user of the Azure SQL Database",
                         "options": {
-                            "hideConfirmation": true
+                            "hideConfirmation": false
                         },
                         "constraints": {
                             "required": true
@@ -150,7 +161,9 @@
                         "toolTip": "The size of virtual machine to provision.",
                         "defaultValue": "Standard_B4ms",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         }
                     },
                     {
@@ -160,7 +173,9 @@
                         "toolTip": "Size of the Virtual Machine which manages the database.",
                         "defaultValue": "Standard_B2ms",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         }
                     },
                     {
@@ -293,7 +308,9 @@
                         "toolTip": "Existing DB. The name of the existing Database Server to connect to. If the name has /MSSQLSERVER appended, omit it.",
                         "defaultValue": "lansa",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         },
                         "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'existing')]"
                     },
@@ -304,7 +321,9 @@
                         "toolTip": "The name of the new database to create or name of the existing database to connect to.",
                         "defaultValue": "lansa",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         },
                         "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'existing')]"
                     }
