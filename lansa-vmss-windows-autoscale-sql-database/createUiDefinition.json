@@ -284,8 +284,7 @@
                                     "value": "MYSQL"
                                 }
                             ]
-                        },
-                        "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'existing')]"
+                        }
                     },
                     {
                         "name": "databaseServerName",
@@ -330,7 +329,10 @@
             "maximumInstanceCount": "[int(steps('VirtualMachineConfig').maximumInstanceCount)]",
             "osName": "[steps('VirtualMachineConfig').osName]",
             "lansaVersion": "[steps('VirtualMachineConfig').lansaVersion]",
-            "databaseNewOrExisting": "[steps('DatabaseConfig').databaseNewOrExisting]"
+            "databaseNewOrExisting": "[steps('DatabaseConfig').databaseNewOrExisting]",
+            "databaseType": "[steps('DatabaseConfig').databaseType]",
+            "databaseServerName": "[steps('DatabaseConfig').databaseServerName]",
+            "databaseName": "[steps('DatabaseConfig').databaseName]"
         }
     }
 }
