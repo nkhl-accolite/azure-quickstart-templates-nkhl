@@ -1,0 +1,336 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/0.1.2-preview/CreateUIDefinition.MultiVm.json#",
+    "handler": "Microsoft.Azure.CreateUIDef",
+    "version": "0.1.2-preview",
+    "parameters": {
+        "basics": [
+            
+        ],
+        "steps": [
+            {
+                "name": "SecurityConfig",
+                "label": "Security",
+                "subLabel": {
+                    "preValidation": "Configurations regarding credentials",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Security",
+                "elements": [
+                    {
+                        "name": "stackName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Stack Name",
+                        "toolTip": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended. Some identifiers use precisely 9 characters from this name and so it can be useful to use exactly 9. The template pads it out or truncates it as necessary to make it 9 characters long where required.",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "msiURL",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "MSI URL",
+                        "toolTip": "URL of the LANSA MSI which will be installed on each virtual machine.",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "certificateBase64Encoded",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Certficate Base64Encoded",
+                        "toolTip": "Base 64 encoded String representing the SSL certificate",
+                        "constraints": {
+                            "required": true,
+                            "validationMessage": "The certificate field cannot be empty."
+                        }
+                    },
+                    {
+                        "name": "certificatePassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password" : "Certificate Password",
+                            "confirmPassword": "Confirm Certificate Password"
+                        },
+                        "toolTip": "SSL certificate password",
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": true
+                    },
+                    {
+                        "name": "adminUsername",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Admin Username",
+                        "toolTip": "Admin username on all VMs",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "adminPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password" : "Admin Password",
+                            "confirmPassword": "Confirm Admin Password"
+                        },
+                        "toolTip": "Admin password on all VMs",
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "webUsername",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Web Username",
+                        "toolTip": "Web Server username on all VMs. This should be different from Admin Username",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "webPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password" : "Web Password",
+                            "confirmPassword": "Confirm Web Password"
+                        },
+                        "toolTip": "Web Server password on all VMs",
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "databaseLogin",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Database Login",
+                        "toolTip": "The admin user of the Azure SQL Database",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "databaseLoginPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password" : "Database Password",
+                            "confirmPassword": "Confirm Database Password"
+                        },
+                        "toolTip": "The password of the admin user of the Azure SQL Database",
+                        "options": {
+                            "hideConfirmation": true
+                        },
+                        "constraints": {
+                            "required": true
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "VirtualMachineConfig",
+                "label": "Virtual Machine Settings",
+                "subLabel": {
+                    "preValidation": "Configure the virtual machine's resources and settings",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Virtual Machine Settings",
+                "elements": [
+                    {
+                        "name": "virtualMachineSize",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Virtual machine size",
+                        "toolTip": "The size of virtual machine to provision.",
+                        "defaultValue": "Standard_B4ms",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "dbVirtualMachineSize",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Db Virtual machine size",
+                        "toolTip": "Size of the Virtual Machine which manages the database.",
+                        "defaultValue": "Standard_B2ms",
+                        "constraints": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "minimumInstanceCount",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Minimum Instance Count",
+                        "toolTip": "Minimum number of Virtual Machine instances (1 or more).",
+                        "defaultValue": "[int('1')]",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[1-9][0-9]?$|^100$",
+                            "validationMessage": "Only numerals are are allowed. The value must be from 1-100."
+                        }
+                    },
+                    {
+                        "name": "maximumInstanceCount",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Maximum Instance Count",
+                        "toolTip": "Maximum number of Virtual Machine instances (100 or less).",
+                        "defaultValue": "[int('100')]",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[1-9][0-9]?$|^100$",
+                            "validationMessage": "Only numerals are are allowed. The value must be from 1-100."
+                        }
+                    },
+                    {
+                        "name": "osName",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "OS Name",
+                        "toolTip": "Choose the Windows Server image version to use",
+                        "defaultValue": "Windows Server 2019",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "Windows Server 2019",
+                                    "value": "Windows Server 2019"
+                                },
+                                {
+                                    "label": "Windows Server 2016",
+                                    "value": "Windows Server 2016"
+                                },
+                                {
+                                    "label": "Windows Server 2012",
+                                    "value": "Windows Server 2012"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "lansaVersion",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "LANSA Version",
+                        "toolTip": "Visual LANSA Version",
+                        "defaultValue": "V15 GA",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "V15 GA",
+                                    "value": "V15 GA"
+                                },
+                                {
+                                    "label": "V14 SP2",
+                                    "value": "V14 SP2"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "DatabaseConfig",
+                "label": "Database Settings",
+                "subLabel": {
+                    "preValidation": "Configure the database resources and settings",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Database Settings",
+                "elements": [
+                    {
+                        "name": "databaseNewOrExisting",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Database New/Existing",
+                        "toolTip": "Determines whether a new SQL database should be provisioned or to use an existing database. Parameters which are relevant to choosing 'new' are prefixed 'New DB'. Parameters which are relevant to choosing 'existing' are prefixed 'Existing DB'",
+                        "defaultValue": "new",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "new",
+                                    "value": "new"
+                                },
+                                {
+                                    "label": "existing",
+                                    "value": "existing"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "databaseType",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Database Type",
+                        "toolTip": "Existing DB. Refer to LANSA documentation for an explanation of each Database Type and the supported versions of the database servers. DO NOT CHANGE THIS IF CREATING A NEW DATABASE. IT MUST BE SET TO SQLAZURE.",
+                        "defaultValue": "SQLAZURE",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "MSSQLS",
+                                    "value": "MSSQLS"
+                                },
+                                {
+                                    "label": "SQLAZURE",
+                                    "value": "SQLAZURE"
+                                },
+                                {
+                                    "label": "MYSQL",
+                                    "value": "MYSQL"
+                                }
+                            ]
+                        },
+                        "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'existing')]"
+                    },
+                    {
+                        "name": "databaseServerName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Database Server Name",
+                        "toolTip": "Existing DB. The name of the existing Database Server to connect to. If the name has /MSSQLSERVER appended, omit it.",
+                        "defaultValue": "lansa",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'existing')]"
+                    },
+                    {
+                        "name": "databaseName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Database Name",
+                        "toolTip": "The name of the new database to create or name of the existing database to connect to.",
+                        "defaultValue": "lansa",
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'existing')]"
+                    }
+                ]
+            }
+        ],
+        "outputs": {
+            "location": "[location()]",
+            "stackName": "[steps('SecurityConfig').stackName]",
+            "msiURL": "[steps('SecurityConfig').msiURL]",
+            "certificateBase64Encoded": "[steps('SecurityConfig').certificateBase64Encoded]",
+            "certificatePassword": "[steps('SecurityConfig').certificatePassword]",
+            "adminUsername": "[steps('SecurityConfig').adminUsername]",
+            "adminPassword": "[steps('SecurityConfig').adminPassword]",
+            "webUsername": "[steps('SecurityConfig').webUsername]",
+            "webPassword": "[steps('SecurityConfig').webPassword]",
+            "databaseLogin": "[steps('SecurityConfig').databaseLogin]",
+            "databaseLoginPassword": "[steps('SecurityConfig').databaseLoginPassword]",
+            "virtualMachineSize": "[steps('VirtualMachineConfig').virtualMachineSize]",
+            "dbVirtualMachineSize": "[steps('VirtualMachineConfig').dbVirtualMachineSize]",
+            "minimumInstanceCount": "[int(steps('VirtualMachineConfig').minimumInstanceCount)]",
+            "maximumInstanceCount": "[int(steps('VirtualMachineConfig').maximumInstanceCount)]",
+            "osName": "[steps('VirtualMachineConfig').osName]",
+            "lansaVersion": "[steps('VirtualMachineConfig').lansaVersion]",
+            "databaseNewOrExisting": "[steps('DatabaseConfig').databaseNewOrExisting]"
+        }
+    }
+}
