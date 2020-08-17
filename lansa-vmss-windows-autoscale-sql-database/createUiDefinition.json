@@ -193,6 +193,30 @@
                 "bladeTitle": "Virtual Machine",
                 "elements": [
                     {
+                        "name": "osName",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "OS Name",
+                        "toolTip": "Choose the Windows Server image version to use",
+                        "defaultValue": "Windows Server 2019",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "Windows Server 2019",
+                                    "value": "Windows Server 2019"
+                                },
+                                {
+                                    "label": "Windows Server 2016",
+                                    "value": "Windows Server 2016"
+                                },
+                                {
+                                    "label": "Windows Server 2012",
+                                    "value": "Windows Server 2012"
+                                }
+                            ]
+                        }
+                    },
+                    {
                         "name": "virtualMachineSize",
                         "type": "Microsoft.Compute.SizeSelector",
                         "label": "Virtual machine size",
@@ -203,6 +227,7 @@
                         "constraints": {
                             "allowedSizes": []
                         },
+                        "count": "[int(steps('VirtualMachineConfig').minimumInstanceCount)]",
                         "osPlatform": "Windows"
                     },
                     {
@@ -216,6 +241,7 @@
                         "constraints": {
                             "allowedSizes": []
                         },
+                        "count": 1,
                         "osPlatform": "Windows"
                     },
                     {
@@ -240,30 +266,6 @@
                             "required": true,
                             "regex": "^[1-9][0-9]?$|^100$",
                             "validationMessage": "Only numerals are allowed. The value must be from 1-100."
-                        }
-                    },
-                    {
-                        "name": "osName",
-                        "type": "Microsoft.Common.DropDown",
-                        "label": "OS Name",
-                        "toolTip": "Choose the Windows Server image version to use",
-                        "defaultValue": "Windows Server 2019",
-                        "constraints": {
-                            "required": true,
-                            "allowedValues":[
-                                {
-                                    "label": "Windows Server 2019",
-                                    "value": "Windows Server 2019"
-                                },
-                                {
-                                    "label": "Windows Server 2016",
-                                    "value": "Windows Server 2016"
-                                },
-                                {
-                                    "label": "Windows Server 2012",
-                                    "value": "Windows Server 2012"
-                                }
-                            ]
                         }
                     },
                     {
@@ -413,7 +415,7 @@
                                 }
                             ]
                         },
-                        "visible": "[equals(steps('DatabaseConfig').edition, 'Basic')]"
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Basic'), equals(steps('DatabaseConfig').databaseNewOrExisting, 'new'))]"
                     },
                     {
                         "name": "requestedServiceObjectiveNameStandard",
@@ -462,7 +464,7 @@
                                 }
                             ]
                         },
-                        "visible": "[equals(steps('DatabaseConfig').edition, 'Standard')]"
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Standard'), equals(steps('DatabaseConfig').databaseNewOrExisting, 'new'))]"
                     },
                     {
                         "name": "requestedServiceObjectiveNamePremium",
@@ -499,7 +501,7 @@
                                 }
                             ]
                         },
-                        "visible": "[equals(steps('DatabaseConfig').edition, 'Premium')]"
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Premium'), equals(steps('DatabaseConfig').databaseNewOrExisting, 'new'))]"
                     },
                     {
                         "name": "maxSizeBytes",
