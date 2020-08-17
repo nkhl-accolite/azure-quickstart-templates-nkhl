@@ -160,7 +160,7 @@
                         "name": "databaseLogin",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Database Login",
-                        "toolTip": "The admin user of the Azure SQL Database",
+                        "toolTip": "The admin user of the Database",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
@@ -174,14 +174,12 @@
                             "password" : "Database Password",
                             "confirmPassword": "Confirm Database Password"
                         },
-                        "toolTip": "The password of the admin user of the Azure SQL Database",
+                        "toolTip": "The password of the admin user of the Database",
                         "options": {
                             "hideConfirmation": false
                         },
                         "constraints": {
-                            "required": true,
-                            "regex": "^((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*]).{12,255})$",
-                            "validationMessage": "Password length should be 12-255 characters long, and have at least one number, one lower case, one upper case and one special character"
+                            "required": true
                         }
                     }
                 ]
@@ -228,7 +226,7 @@
                         "constraints": {
                             "required": true,
                             "regex": "^[1-9][0-9]?$|^100$",
-                            "validationMessage": "Only numerals are are allowed. The value must be from 1-100."
+                            "validationMessage": "Only numerals are allowed. The value must be from 1-100."
                         }
                     },
                     {
@@ -240,7 +238,7 @@
                         "constraints": {
                             "required": true,
                             "regex": "^[1-9][0-9]?$|^100$",
-                            "validationMessage": "Only numerals are are allowed. The value must be from 1-100."
+                            "validationMessage": "Only numerals are allowed. The value must be from 1-100."
                         }
                     },
                     {
@@ -272,7 +270,7 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "Web Server Max Connect",
                         "toolTip": "The maximum number of LANSA jobs to run on each Web Server. Setting triggerWebConfig will cause this value to be updated.",
-                        "defaultValue": "20",
+                        "defaultValue": "[int('20')]",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
@@ -481,7 +479,7 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "Max Size Bytes",
                         "toolTip": "The maximum size, in bytes, for the new database",
-                        "defaultValue": "1073741824",
+                        "defaultValue": "[int('1073741824')]",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
@@ -690,7 +688,7 @@
             "minimumInstanceCount": "[int(steps('VirtualMachineConfig').minimumInstanceCount)]",
             "maximumInstanceCount": "[int(steps('VirtualMachineConfig').maximumInstanceCount)]",
             "osName": "[steps('VirtualMachineConfig').osName]",
-            "webServerMaxConnect": "[steps('VirtualMachineConfig').webServerMaxConnect]",
+            "webServerMaxConnect": "[int(steps('VirtualMachineConfig').webServerMaxConnect)]",
             "databaseNewOrExisting": "[steps('DatabaseConfig').databaseNewOrExisting]",
             "databaseType": "[steps('DatabaseConfig').databaseType]",
             "databaseServerName": "[steps('DatabaseConfig').databaseServerName]",
@@ -698,7 +696,7 @@
             "collation": "[steps('DatabaseConfig').collation]",
             "edition": "[steps('DatabaseConfig').edition]",
             "requestedServiceObjectiveName": "[steps('DatabaseConfig').requestedServiceObjectiveName]",
-            "maxSizeBytes": "[steps('DatabaseConfig').maxSizeBytes]",
+            "maxSizeBytes": "[int(steps('DatabaseConfig').maxSizeBytes)]",
             "applicationGatewaySkuTier": "[steps('applicationGatewayConfig').applicationGatewaySkuTier]",
             "applicationGatewaySkuName": "[steps('applicationGatewayConfig').applicationGatewaySkuName]",
             "applicationGatewayCapacity": "[int(steps('applicationGatewayConfig').applicationGatewayCapacity)]",
