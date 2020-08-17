@@ -194,27 +194,29 @@
                 "elements": [
                     {
                         "name": "virtualMachineSize",
-                        "type": "Microsoft.Common.TextBox",
+                        "type": "Microsoft.Compute.SizeSelector",
                         "label": "Virtual machine size",
                         "toolTip": "The size of virtual machine to provision.",
-                        "defaultValue": "Standard_B4ms",
+                        "recommendedSizes": [
+                            "Standard_B4ms"
+                        ],
                         "constraints": {
-                            "required": true,
-                            "regex": "^(?!\\s*$).+",
-                            "validationMessage": "The value must not be empty."
-                        }
+                            "allowedSizes": []
+                        },
+                        "osPlatform": "Windows"
                     },
                     {
                         "name": "dbVirtualMachineSize",
-                        "type": "Microsoft.Common.TextBox",
+                        "type": "Microsoft.Compute.SizeSelector",
                         "label": "Db Virtual machine size",
                         "toolTip": "Size of the Virtual Machine which manages the database.",
-                        "defaultValue": "Standard_B2ms",
+                        "recommendedSizes": [
+                            "Standard_B2ms"
+                        ],
                         "constraints": {
-                            "required": true,
-                            "regex": "^(?!\\s*$).+",
-                            "validationMessage": "The value must not be empty."
-                        }
+                            "allowedSizes": []
+                        },
+                        "osPlatform": "Windows"
                     },
                     {
                         "name": "minimumInstanceCount",
