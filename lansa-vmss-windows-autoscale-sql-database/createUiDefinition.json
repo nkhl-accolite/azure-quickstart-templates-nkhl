@@ -21,7 +21,6 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "Stack Name",
                         "toolTip": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended. Some identifiers use precisely 9 characters from this name and so it can be useful to use exactly 9. The template pads it out or truncates it as necessary to make it 9 characters long where required.",
-                        "defaultValue": "stack",
                         "constraints": {
                             "required": true,
                             "regex": "^([a-zA-z-]{3,61})$",
@@ -270,11 +269,11 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "Web Server Max Connect",
                         "toolTip": "The maximum number of LANSA jobs to run on each Web Server. Setting triggerWebConfig will cause this value to be updated.",
-                        "defaultValue": "[int('20')]",
+                        "defaultValue": "20",
                         "constraints": {
                             "required": true,
-                            "regex": "^(?!\\s*$).+",
-                            "validationMessage": "The value must not be empty."
+                            "regex": "^[0-9]+$",
+                            "validationMessage": "Numeric field."
                         }
                     }
                 ]
@@ -398,7 +397,24 @@
                         "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'new')]"
                     },
                     {
-                        "name": "requestedServiceObjectiveName",
+                        "name": "requestedServiceObjectiveNameBasic",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Requested Service Objective Name",
+                        "toolTip": "Describes the performance level for Edition",
+                        "defaultValue": "Basic",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "Basic",
+                                    "value": "Basic"
+                                }
+                            ]
+                        },
+                        "visible": "[equals(steps('DatabaseConfig').edition, 'Basic')]"
+                    },
+                    {
+                        "name": "requestedServiceObjectiveNameStandard",
                         "type": "Microsoft.Common.DropDown",
                         "label": "Requested Service Objective Name",
                         "toolTip": "Describes the performance level for Edition",
@@ -406,10 +422,6 @@
                         "constraints": {
                             "required": true,
                             "allowedValues":[
-                                {
-                                    "label": "Basic",
-                                    "value": "Basic"
-                                },
                                 {
                                     "label": "S0",
                                     "value": "S0"
@@ -445,7 +457,20 @@
                                 {
                                     "label": "S12",
                                     "value": "S12"
-                                },
+                                }
+                            ]
+                        },
+                        "visible": "[equals(steps('DatabaseConfig').edition, 'Standard')]"
+                    },
+                    {
+                        "name": "requestedServiceObjectiveNamePremium",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Requested Service Objective Name",
+                        "toolTip": "Describes the performance level for Edition",
+                        "defaultValue": "P2",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
                                 {
                                     "label": "P1",
                                     "value": "P1"
@@ -472,18 +497,18 @@
                                 }
                             ]
                         },
-                        "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'new')]"
+                        "visible": "[equals(steps('DatabaseConfig').edition, 'Premium')]"
                     },
                     {
                         "name": "maxSizeBytes",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Max Size Bytes",
                         "toolTip": "The maximum size, in bytes, for the new database",
-                        "defaultValue": "[int('1073741824')]",
+                        "defaultValue": "1073741824",
                         "constraints": {
                             "required": true,
-                            "regex": "^(?!\\s*$).+",
-                            "validationMessage": "The value must not be empty."
+                            "regex": "^[0-9]+$",
+                            "validationMessage": "Numeric field."
                         },
                         "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'new')]"
                     }
@@ -519,7 +544,7 @@
                         }
                     },
                     {
-                        "name": "applicationGatewaySkuName",
+                        "name": "applicationGatewaySkuNameStandard",
                         "type": "Microsoft.Common.DropDown",
                         "label": "Application Gateway SKU Name",
                         "toolTip": "Application Gateway SKU Name",
@@ -537,7 +562,20 @@
                                 },{
                                     "label": "Standard Large",
                                     "value": "Standard_Large"
-                                },
+                                }
+                            ]
+                        },
+                        "visible": "[equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'Standard')]"
+                    },
+                    {
+                        "name": "applicationGatewaySkuNameWAF",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Application Gateway SKU Name",
+                        "toolTip": "Application Gateway SKU Name",
+                        "defaultValue": "WAF Medium",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
                                 {
                                     "label": "WAF Medium",
                                     "value": "WAF_Medium"
@@ -550,7 +588,8 @@
                                     "value": "WAF_v2"
                                 }
                             ]
-                        }
+                        },
+                        "visible": "[equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'WAF')]"
                     },
                     {
                         "name": "applicationGatewayCapacity",
@@ -688,17 +727,17 @@
             "minimumInstanceCount": "[int(steps('VirtualMachineConfig').minimumInstanceCount)]",
             "maximumInstanceCount": "[int(steps('VirtualMachineConfig').maximumInstanceCount)]",
             "osName": "[steps('VirtualMachineConfig').osName]",
-            "webServerMaxConnect": "[int(steps('VirtualMachineConfig').webServerMaxConnect)]",
+            "webServerMaxConnect": "[steps('VirtualMachineConfig').webServerMaxConnect]",
             "databaseNewOrExisting": "[steps('DatabaseConfig').databaseNewOrExisting]",
             "databaseType": "[steps('DatabaseConfig').databaseType]",
             "databaseServerName": "[steps('DatabaseConfig').databaseServerName]",
             "databaseName": "[steps('DatabaseConfig').databaseName]",
             "collation": "[steps('DatabaseConfig').collation]",
             "edition": "[steps('DatabaseConfig').edition]",
-            "requestedServiceObjectiveName": "[steps('DatabaseConfig').requestedServiceObjectiveName]",
-            "maxSizeBytes": "[int(steps('DatabaseConfig').maxSizeBytes)]",
+            "requestedServiceObjectiveName": "[coalesce(steps('DatabaseConfig').requestedServiceObjectiveNameBasic, steps('DatabaseConfig').requestedServiceObjectiveNameStandard, steps('DatabaseConfig').requestedServiceObjectiveNamePremium)]",
+            "maxSizeBytes": "[steps('DatabaseConfig').maxSizeBytes]",
             "applicationGatewaySkuTier": "[steps('applicationGatewayConfig').applicationGatewaySkuTier]",
-            "applicationGatewaySkuName": "[steps('applicationGatewayConfig').applicationGatewaySkuName]",
+            "applicationGatewaySkuName": "[coalesce(steps('applicationGatewayConfig').applicationGatewaySkuNameStandard, steps('applicationGatewayConfig').applicationGatewaySkuNameWAF)]",
             "applicationGatewayCapacity": "[int(steps('applicationGatewayConfig').applicationGatewayCapacity)]",
             "installMSI": "[steps('InstallationOptionsConfig').installMSI]",
             "updateMSI": "[steps('InstallationOptionsConfig').updateMSI]",
