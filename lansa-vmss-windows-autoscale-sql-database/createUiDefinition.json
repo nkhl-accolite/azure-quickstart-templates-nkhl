@@ -227,6 +227,11 @@
                         "constraints": {
                             "allowedSizes": []
                         },
+                        "imageReference": {
+                            "publisher": "lansa",
+                            "offer": "lansa-scalable-license",
+                            "sku": "lansa-scalable-license-14-2"
+                        },
                         "count": "[int(steps('VirtualMachineConfig').minimumInstanceCount)]",
                         "osPlatform": "Windows"
                     },
@@ -240,6 +245,11 @@
                         ],
                         "constraints": {
                             "allowedSizes": []
+                        },
+                        "imageReference": {
+                            "publisher": "lansa",
+                            "offer": "lansa-scalable-license",
+                            "sku": "lansa-scalable-license-14-2"
                         },
                         "count": 1,
                         "osPlatform": "Windows"
