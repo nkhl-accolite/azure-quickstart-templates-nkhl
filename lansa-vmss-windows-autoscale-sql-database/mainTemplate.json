@@ -316,7 +316,7 @@
       },
       "gitBranch": {
          "type": "string",
-         "defaultValue": "support/L4W14200_scalable",
+         "defaultValue": "support/scalable",
          "metadata": {
             "description": "Git Branch"
          }
