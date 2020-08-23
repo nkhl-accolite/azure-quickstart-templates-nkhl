@@ -1,5 +1,5 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
@@ -41,9 +41,6 @@
         "virtualMachineComputerName": {
             "type": "string"
         },
-        "virtualMachineRG": {
-            "type": "string"
-        },
         "osDiskType": {
             "type": "string"
         },
@@ -63,9 +60,6 @@
             "type": "secureString"
         },
         "diagnosticsStorageAccountName": {
-            "type": "string"
-        },
-        "diagnosticsStorageAccountId": {
             "type": "string"
         },
         "diagnosticsStorageAccountType": {
@@ -104,20 +98,11 @@
         "sqlPortNumber": {
             "type": "int"
         },
-        "sqlStorageDisksCount": {
-            "type": "int"
-        },
         "sqlStorageWorkloadType": {
             "type": "string"
         },
         "sqlStorageDisksConfigurationType": {
             "type": "string"
-        },
-        "sqlStorageStartingDeviceId": {
-            "type": "int"
-        },
-        "sqlStorageDeploymentToken": {
-            "type": "int"
         },
         "sqlAutopatchingDayOfWeek": {
             "type": "string"
@@ -154,9 +139,11 @@
         }
     },
     "variables": {
-        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
-        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+        "resourceGroupName": "[resourceGroup().name]",
+        "nsgId": "[resourceId(variables('resourceGroupName'), 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
+        "vnetId": "[resourceId(variables('resourceGroupName'),'Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+        "managedDiskId": "[coalesce(parameters('dataDisks')[copyIndex('dataDisks')].id, if(equals(parameters('dataDisks')[copyIndex('dataDisks')].name, json('null')), json('null'), resourceId('Microsoft.Compute/disks', parameters('dataDisks')[copyIndex('dataDisks')].name)))]"
     },
     "resources": [
         {
@@ -175,11 +162,11 @@
                         "name": "ipconfig1",
                         "properties": {
                             "subnet": {
-                                "id": "[variables('subnetRef')]"
+                                "id": "[if(equals(1,1), variables('subnetRef'), json('null'))]"
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                                "id": "[resourceId(variables('resourceGroupName'), 'Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
                             }
                         }
                     }
@@ -274,7 +261,7 @@
                                 "writeAcceleratorEnabled": "[parameters('dataDisks')[copyIndex('dataDisks')].writeAcceleratorEnabled]",
                                 "diskSizeGB": "[parameters('dataDisks')[copyIndex('dataDisks')].diskSizeGB]",
                                 "managedDisk": {
-                                    "id": "[coalesce(parameters('dataDisks')[copyIndex('dataDisks')].id, if(equals(parameters('dataDisks')[copyIndex('dataDisks')].name, json('null')), json('null'), resourceId('Microsoft.Compute/disks', parameters('dataDisks')[copyIndex('dataDisks')].name)))]",
+                                    "id": "[if(equals(1,1), variables('managedDiskId'), json('null'))]",
                                     "storageAccountType": "[parameters('dataDisks')[copyIndex('dataDisks')].storageAccountType]",
                                     "diskEncryptionSet": "[parameters('dataDisks')[copyIndex('dataDisks')].diskEncryptionSet]"
                                 }
@@ -320,7 +307,7 @@
         {
             "name": "[concat('shutdown-computevm-', parameters('virtualMachineName'))]",
             "type": "Microsoft.DevTestLab/schedules",
-            "apiVersion": "2017-04-26-preview",
+            "apiVersion": "2018-09-15",
             "location": "[parameters('location')]",
             "dependsOn": [
                 "[concat('Microsoft.Compute/virtualMachines/', parameters('virtualMachineName'))]"
@@ -336,7 +323,7 @@
                 "notificationSettings": {
                     "status": "[parameters('autoShutdownNotificationStatus')]",
                     "notificationLocale": "[parameters('autoShutdownNotificationLocale')]",
-                    "timeInMinutes": "30",
+                    "timeInMinutes": 30,
                     "emailRecipient": "[parameters('autoShutdownNotificationEmail')]"
                 }
             }
@@ -357,8 +344,7 @@
                     "MaintenanceWindowDuration": "[parameters('sqlAutopatchingWindowDuration')]"
                 },
                 "KeyVaultCredentialSettings": {
-                    "Enable": false,
-                    "CredentialName": ""
+                    "Enable": false
                 },
                 "StorageConfigurationSettings": {
                     "DiskConfigurationType": "[parameters('sqlStorageDisksConfigurationType')]",
