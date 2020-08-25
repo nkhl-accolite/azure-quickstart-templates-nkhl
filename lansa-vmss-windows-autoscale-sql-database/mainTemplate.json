@@ -1116,6 +1116,11 @@
          "condition": "[not(variables('isCustomImage'))]",
          "value": "[variables('imageSku')]",
          "type": "string"
+      },
+      "customImageId": {
+         "condition": "[variables('isCustomImage')]",
+         "value": "[parameters('imageId')]",
+         "type": "string"
       }
    }
 }
