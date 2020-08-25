@@ -1,0 +1,186 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "australiaeast"
+        },
+        "networkInterfaceName": {
+            "value": "test-sql389"
+        },
+        "networkSecurityGroupName": {
+            "value": "test-sql-nsg"
+        },
+        "networkSecurityGroupRules": {
+            "value": [
+                {
+                    "name": "RDP",
+                    "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "3389"
+                    }
+                },
+                {
+                    "name": "default-allow-sql",
+                    "properties": {
+                        "priority": 1600,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "1433"
+                    }
+                }
+            ]
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "virtualNetworkName": {
+            "value": "test-sql-vnet"
+        },
+        "addressPrefixes": {
+            "value": [
+                "10.1.0.0/24"
+            ]
+        },
+        "subnets": {
+            "value": [
+                {
+                    "name": "default",
+                    "properties": {
+                        "addressPrefix": "10.1.0.0/24"
+                    }
+                }
+            ]
+        },
+        "publicIpAddressName": {
+            "value": "test-sql-ip"
+        },
+        "publicIpAddressType": {
+            "value": "Dynamic"
+        },
+        "publicIpAddressSku": {
+            "value": "Basic"
+        },
+        "virtualMachineName": {
+            "value": "test-sql"
+        },
+        "virtualMachineComputerName": {
+            "value": "test-sql"
+        },
+        "osDiskType": {
+            "value": "StandardSSD_LRS"
+        },
+        "dataDisks": {
+            "value": [
+                {
+                    "lun": 0,
+                    "createOption": "attach",
+                    "caching": "ReadOnly",
+                    "writeAcceleratorEnabled": false,
+                    "id": null,
+                    "name": "test-sql_DataDisk_0",
+                    "storageAccountType": null,
+                    "diskSizeGB": null,
+                    "diskEncryptionSet": null
+                }
+            ]
+        },
+        "dataDiskResources": {
+            "value": [
+                {
+                    "name": "test-sql_DataDisk_0",
+                    "sku": "Premium_LRS",
+                    "properties": {
+                        "diskSizeGB": 16,
+                        "creationData": {
+                            "createOption": "empty"
+                        }
+                    }
+                }
+            ]
+        },
+        "virtualMachineSize": {
+            "value": "Standard_B8ms"
+        },
+        "adminUsername": {
+            "value": "lansa"
+        },
+        "adminPassword": {
+            "value": "Pcxuser@122robg"
+        },
+        "diagnosticsStorageAccountName": {
+            "value": "testmssqldiag"
+        },
+        "diagnosticsStorageAccountType": {
+            "value": "Standard_LRS"
+        },
+        "diagnosticsStorageAccountKind": {
+            "value": "Storage"
+        },
+        "sqlVirtualMachineLocation": {
+            "value": "australiaeast"
+        },
+        "sqlVirtualMachineName": {
+            "value": "test-sql"
+        },
+        "sqlConnectivityType": {
+            "value": "Public"
+        },
+        "sqlPortNumber": {
+            "value": 1433
+        },
+        "sqlStorageWorkloadType": {
+            "value": "OLTP"
+        },
+        "sqlStorageDisksConfigurationType": {
+            "value": "NEW"
+        },
+        "sqlAutopatchingDayOfWeek": {
+            "value": "Sunday"
+        },
+        "sqlAutopatchingStartHour": {
+            "value": "2"
+        },
+        "sqlAutopatchingWindowDuration": {
+            "value": "60"
+        },
+        "sqlAuthenticationLogin": {
+            "value": "lansa"
+        },
+        "sqlAuthenticationPassword": {
+            "value": "Pcxuser@122robg"
+        },
+        "dataPath": {
+            "value": "F:\\data"
+        },
+        "dataDisksLUNs": {
+            "value": [
+                0
+            ]
+        },
+        "logPath": {
+            "value": "F:\\log"
+        },
+        "logDisksLUNs": {
+            "value": [
+                0
+            ]
+        },
+        "tempDbPath": {
+            "value": "D:\\tempDb"
+        },
+        "rServicesEnabled": {
+            "value": "false"
+        }
+    }
+}
