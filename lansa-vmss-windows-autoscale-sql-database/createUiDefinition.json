@@ -584,10 +584,6 @@
                                 },{
                                     "label": "WAF Large",
                                     "value": "WAF_Large"
-                                },
-                                {
-                                    "label": "WAF v2",
-                                    "value": "WAF_v2"
                                 }
                             ]
                         },
