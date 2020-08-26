@@ -245,5 +245,11 @@
                 "EndIpAddress": "[variables('firewallrules').batch.rules[copyIndex()].EndIpAddress]"
             }
         }
-    ]
+    ],
+    "outputs": {
+        "serverName": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.DBforMySQL/servers', parameters('serverName'))).fullyQualifiedDomainName]"
+        }
+    }
 }

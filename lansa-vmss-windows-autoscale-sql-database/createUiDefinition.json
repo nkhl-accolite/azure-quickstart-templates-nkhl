@@ -4,7 +4,161 @@
     "version": "0.1.2-preview",
     "parameters": {
         "basics": [
-            
+            {
+                "name": "stackName",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Stack Name",
+                "toolTip": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended. Some identifiers use precisely 9 characters from this name and so it can be useful to use exactly 9. The template pads it out or truncates it as necessary to make it 9 characters long where required.",
+                "constraints": {
+                    "required": true,
+                    "regex": "^([a-zA-z-]{3,61})$",
+                    "validationMessage": "Only alphabets and hyphen are allowed, and the value must be 3-61 characters long."
+                }
+            },
+            {
+                "name": "lansaVersion",
+                "type": "Microsoft.Common.DropDown",
+                "label": "LANSA Version",
+                "toolTip": "Visual LANSA Version",
+                "defaultValue": "V15 GA",
+                "constraints": {
+                    "required": true,
+                    "allowedValues":[
+                        {
+                            "label": "V15 GA",
+                            "value": "V15 GA"
+                        },
+                        {
+                            "label": "V14 SP2",
+                            "value": "V14 SP2"
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "msiURLV15",
+                "type": "Microsoft.Common.TextBox",
+                "label": "MSI URL",
+                "toolTip": "URL of the LANSA MSI which will be installed on each virtual machine.",
+                "defaultValue": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v15.0.0_en-us.msi",
+                "constraints": {
+                    "required": true,
+                    "regex": "^(?!\\s*$).+",
+                    "validationMessage": "The value must not be empty."
+                },
+                "visible": "[equals(basics('lansaVersion'), 'V15 GA')]"
+            },
+            {
+                "name": "msiURLV14",
+                "type": "Microsoft.Common.TextBox",
+                "label": "MSI URL",
+                "toolTip": "URL of the LANSA MSI which will be installed on each virtual machine.",
+                "defaultValue": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v14.2.20715_en-us.msi",
+                "constraints": {
+                    "required": true,
+                    "regex": "^(?!\\s*$).+",
+                    "validationMessage": "The value must not be empty."
+                },
+                "visible": "[equals(basics('lansaVersion'), 'V14 SP2')]"
+            },
+            {
+                "name": "osName",
+                "type": "Microsoft.Common.DropDown",
+                "label": "OS Name",
+                "toolTip": "Choose the Windows Server image version to use",
+                "defaultValue": "Windows Server 2019",
+                "constraints": {
+                    "required": true,
+                    "allowedValues":[
+                        {
+                            "label": "Windows Server 2019",
+                            "value": "Windows Server 2019"
+                        },
+                        {
+                            "label": "Windows Server 2016",
+                            "value": "Windows Server 2016"
+                        },
+                        {
+                            "label": "Windows Server 2012",
+                            "value": "Windows Server 2012"
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "virtualMachineSize",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Virtual machine size",
+                "toolTip": "The size of virtual machine to provision.",
+                "recommendedSizes": [
+                    "Standard_B4ms"
+                ],
+                "constraints": {
+                    "allowedSizes": []
+                },
+                "imageReference": {
+                    "publisher": "lansa",
+                    "offer": "lansa-scalable-license",
+                    "sku": "lansa-scalable-license-14-2"
+                },
+                "count": "[int(basics('minimumInstanceCount'))]",
+                "osPlatform": "Windows"
+            },
+            {
+                "name": "dbVirtualMachineSize",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Db Virtual machine size",
+                "toolTip": "Size of the Virtual Machine which manages the database.",
+                "recommendedSizes": [
+                    "Standard_B2ms"
+                ],
+                "constraints": {
+                    "allowedSizes": []
+                },
+                "imageReference": {
+                    "publisher": "lansa",
+                    "offer": "lansa-scalable-license",
+                    "sku": "lansa-scalable-license-14-2"
+                },
+                "count": 1,
+                "osPlatform": "Windows"
+            },
+            {
+                "name": "minimumInstanceCount",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Minimum Instance Count",
+                "toolTip": "Minimum number of Virtual Machine instances (1 or more).",
+                "defaultValue": "[int('1')]",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[1-9][0-9]?$|^100$",
+                    "validationMessage": "Only numerals are allowed. The value must be from 1-100."
+                }
+            },
+            {
+                "name": "maximumInstanceCount",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Maximum Instance Count",
+                "toolTip": "Maximum number of Virtual Machine instances (100 or less).",
+                "defaultValue": "[int('100')]",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[1-9][0-9]?$|^100$",
+                    "validationMessage": "Only numerals are allowed. The value must be from 1-100."
+                }
+            },
+            {
+                "name": "webServerMaxConnect",
+                "type": "Microsoft.Common.TextBox",
+                "label": "Web Server Max Connect",
+                "toolTip": "The maximum number of LANSA jobs to run on each Web Server. Setting triggerWebConfig will cause this value to be updated.",
+                "defaultValue": "20",
+                "constraints": {
+                    "required": true,
+                    "regex": "^[0-9]+$",
+                    "validationMessage": "Numeric field."
+                }
+            }
         ],
         "steps": [
             {
@@ -16,63 +170,6 @@
                 },
                 "bladeTitle": "Security",
                 "elements": [
-                    {
-                        "name": "stackName",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Stack Name",
-                        "toolTip": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended. Some identifiers use precisely 9 characters from this name and so it can be useful to use exactly 9. The template pads it out or truncates it as necessary to make it 9 characters long where required.",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^([a-zA-z-]{3,61})$",
-                            "validationMessage": "Only alphabets and hyphen are allowed, and the value must be 3-61 characters long."
-                        }
-                    },
-                    {
-                        "name": "lansaVersion",
-                        "type": "Microsoft.Common.DropDown",
-                        "label": "LANSA Version",
-                        "toolTip": "Visual LANSA Version",
-                        "defaultValue": "V15 GA",
-                        "constraints": {
-                            "required": true,
-                            "allowedValues":[
-                                {
-                                    "label": "V15 GA",
-                                    "value": "V15 GA"
-                                },
-                                {
-                                    "label": "V14 SP2",
-                                    "value": "V14 SP2"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "msiURLV15",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "MSI URL",
-                        "toolTip": "URL of the LANSA MSI which will be installed on each virtual machine.",
-                        "defaultValue": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v15.0.0_en-us.msi",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^(?!\\s*$).+",
-                            "validationMessage": "The value must not be empty."
-                        },
-                        "visible": "[equals(steps('SecurityConfig').lansaVersion, 'V15 GA')]"
-                    },
-                    {
-                        "name": "msiURLV14",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "MSI URL",
-                        "toolTip": "URL of the LANSA MSI which will be installed on each virtual machine.",
-                        "defaultValue": "https://lansalpcmsdn.blob.core.windows.net/app/test/AWAMAPP_v14.2.20715_en-us.msi",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^(?!\\s*$).+",
-                            "validationMessage": "The value must not be empty."
-                        },
-                        "visible": "[equals(steps('SecurityConfig').lansaVersion, 'V14 SP2')]"
-                    },
                     {
                         "name": "certificateBase64Encoded",
                         "type": "Microsoft.Common.TextBox",
@@ -184,115 +281,6 @@
                 ]
             },
             {
-                "name": "VirtualMachineConfig",
-                "label": "Virtual Machine",
-                "subLabel": {
-                    "preValidation": "Configure the virtual machine's resources and settings",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Virtual Machine",
-                "elements": [
-                    {
-                        "name": "osName",
-                        "type": "Microsoft.Common.DropDown",
-                        "label": "OS Name",
-                        "toolTip": "Choose the Windows Server image version to use",
-                        "defaultValue": "Windows Server 2019",
-                        "constraints": {
-                            "required": true,
-                            "allowedValues":[
-                                {
-                                    "label": "Windows Server 2019",
-                                    "value": "Windows Server 2019"
-                                },
-                                {
-                                    "label": "Windows Server 2016",
-                                    "value": "Windows Server 2016"
-                                },
-                                {
-                                    "label": "Windows Server 2012",
-                                    "value": "Windows Server 2012"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "virtualMachineSize",
-                        "type": "Microsoft.Compute.SizeSelector",
-                        "label": "Virtual machine size",
-                        "toolTip": "The size of virtual machine to provision.",
-                        "recommendedSizes": [
-                            "Standard_B4ms"
-                        ],
-                        "constraints": {
-                            "allowedSizes": []
-                        },
-                        "imageReference": {
-                            "publisher": "lansa",
-                            "offer": "lansa-scalable-license",
-                            "sku": "lansa-scalable-license-14-2"
-                        },
-                        "count": "[int(steps('VirtualMachineConfig').minimumInstanceCount)]",
-                        "osPlatform": "Windows"
-                    },
-                    {
-                        "name": "dbVirtualMachineSize",
-                        "type": "Microsoft.Compute.SizeSelector",
-                        "label": "Db Virtual machine size",
-                        "toolTip": "Size of the Virtual Machine which manages the database.",
-                        "recommendedSizes": [
-                            "Standard_B2ms"
-                        ],
-                        "constraints": {
-                            "allowedSizes": []
-                        },
-                        "imageReference": {
-                            "publisher": "lansa",
-                            "offer": "lansa-scalable-license",
-                            "sku": "lansa-scalable-license-14-2"
-                        },
-                        "count": 1,
-                        "osPlatform": "Windows"
-                    },
-                    {
-                        "name": "minimumInstanceCount",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Minimum Instance Count",
-                        "toolTip": "Minimum number of Virtual Machine instances (1 or more).",
-                        "defaultValue": "[int('1')]",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[1-9][0-9]?$|^100$",
-                            "validationMessage": "Only numerals are allowed. The value must be from 1-100."
-                        }
-                    },
-                    {
-                        "name": "maximumInstanceCount",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Maximum Instance Count",
-                        "toolTip": "Maximum number of Virtual Machine instances (100 or less).",
-                        "defaultValue": "[int('100')]",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[1-9][0-9]?$|^100$",
-                            "validationMessage": "Only numerals are allowed. The value must be from 1-100."
-                        }
-                    },
-                    {
-                        "name": "webServerMaxConnect",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Web Server Max Connect",
-                        "toolTip": "The maximum number of LANSA jobs to run on each Web Server. Setting triggerWebConfig will cause this value to be updated.",
-                        "defaultValue": "20",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[0-9]+$",
-                            "validationMessage": "Numeric field."
-                        }
-                    }
-                ]
-            },
-            {
                 "name": "DatabaseConfig",
                 "label": "Database",
                 "subLabel": {
@@ -326,20 +314,20 @@
                         "type": "Microsoft.Common.DropDown",
                         "label": "Database Type",
                         "toolTip": "Refer to LANSA documentation for an explanation of each Database Type and the supported versions of the database servers.",
-                        "defaultValue": "SQLAZURE",
+                        "defaultValue": "Azure SQL Database",
                         "constraints": {
                             "required": true,
                             "allowedValues":[
                                 {
-                                    "label": "MSSQLS",
+                                    "label": "SQL Server",
                                     "value": "MSSQLS"
                                 },
                                 {
-                                    "label": "SQLAZURE",
+                                    "label": "Azure SQL Database",
                                     "value": "SQLAZURE"
                                 },
                                 {
-                                    "label": "MYSQL",
+                                    "label": "MySQL",
                                     "value": "MYSQL"
                                 }
                             ]
@@ -681,7 +669,7 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "Git Branch",
                         "toolTip": "Git Branch",
-                        "defaultValue": "support/L4W14200_scalable",
+                        "defaultValue": "support/scalable",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
@@ -725,9 +713,15 @@
         ],
         "outputs": {
             "location": "[location()]",
-            "stackName": "[steps('SecurityConfig').stackName]",
-            "lansaVersion": "[steps('SecurityConfig').lansaVersion]",
-            "msiURL": "[coalesce(steps('SecurityConfig').msiURLV14, steps('SecurityConfig').msiURLV15)]",
+            "stackName": "[basics('stackName')]",
+            "lansaVersion": "[basics('lansaVersion')]",
+            "msiURL": "[coalesce(basics('msiURLV14'), basics('msiURLV15'))]",
+            "osName": "[basics('osName')]",
+            "virtualMachineSize": "[basics('virtualMachineSize')]",
+            "dbVirtualMachineSize": "[basics('dbVirtualMachineSize')]",
+            "minimumInstanceCount": "[int(basics('minimumInstanceCount'))]",
+            "maximumInstanceCount": "[int(basics('maximumInstanceCount'))]",
+            "webServerMaxConnect": "[basics('webServerMaxConnect')]",
             "certificateBase64Encoded": "[steps('SecurityConfig').certificateBase64Encoded]",
             "certificatePassword": "[steps('SecurityConfig').certificatePassword]",
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
@@ -736,12 +730,6 @@
             "webPassword": "[steps('SecurityConfig').webPassword]",
             "databaseLogin": "[steps('SecurityConfig').databaseLogin]",
             "databaseLoginPassword": "[steps('SecurityConfig').databaseLoginPassword]",
-            "virtualMachineSize": "[steps('VirtualMachineConfig').virtualMachineSize]",
-            "dbVirtualMachineSize": "[steps('VirtualMachineConfig').dbVirtualMachineSize]",
-            "minimumInstanceCount": "[int(steps('VirtualMachineConfig').minimumInstanceCount)]",
-            "maximumInstanceCount": "[int(steps('VirtualMachineConfig').maximumInstanceCount)]",
-            "osName": "[steps('VirtualMachineConfig').osName]",
-            "webServerMaxConnect": "[steps('VirtualMachineConfig').webServerMaxConnect]",
             "databaseNewOrExisting": "[steps('DatabaseConfig').databaseNewOrExisting]",
             "databaseType": "[steps('DatabaseConfig').databaseType]",
             "databaseServerName": "[steps('DatabaseConfig').databaseServerName]",
