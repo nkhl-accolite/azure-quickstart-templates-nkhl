@@ -314,20 +314,20 @@
                         "type": "Microsoft.Common.DropDown",
                         "label": "Database Type",
                         "toolTip": "Refer to LANSA documentation for an explanation of each Database Type and the supported versions of the database servers.",
-                        "defaultValue": "SQLAZURE",
+                        "defaultValue": "Azure SQL Database",
                         "constraints": {
                             "required": true,
                             "allowedValues":[
                                 {
-                                    "label": "MSSQLS",
+                                    "label": "SQL Server",
                                     "value": "MSSQLS"
                                 },
                                 {
-                                    "label": "SQLAZURE",
+                                    "label": "Azure SQL Database",
                                     "value": "SQLAZURE"
                                 },
                                 {
-                                    "label": "MYSQL",
+                                    "label": "MySQL",
                                     "value": "MYSQL"
                                 }
                             ]
