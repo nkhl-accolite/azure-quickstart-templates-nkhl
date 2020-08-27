@@ -88,7 +88,7 @@
             {
                 "name": "virtualMachineSize",
                 "type": "Microsoft.Compute.SizeSelector",
-                "label": "Virtual machine size",
+                "label": "App Virtual machine size",
                 "toolTip": "The size of virtual machine to provision.",
                 "recommendedSizes": [
                     "Standard_B4ms"
@@ -107,7 +107,7 @@
             {
                 "name": "dbVirtualMachineSize",
                 "type": "Microsoft.Compute.SizeSelector",
-                "label": "Db Virtual machine size",
+                "label": "DB Admin Virtual machine size",
                 "toolTip": "Size of the Virtual Machine which manages the database.",
                 "recommendedSizes": [
                     "Standard_B2ms"
@@ -173,7 +173,7 @@
                     {
                         "name": "certificateBase64Encoded",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Certficate Base64Encoded",
+                        "label": "Certificate Base64Encoded",
                         "toolTip": "Base 64 encoded String representing the SSL certificate",
                         "constraints": {
                             "required": true,
@@ -250,32 +250,6 @@
                             "required": true,
                             "regex": "^((?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*]).{12,255})$",
                             "validationMessage": "Password length should be 12-255 characters long, and have at least one number, one lower case, one upper case and one special character"
-                        }
-                    },
-                    {
-                        "name": "databaseLogin",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Database Login",
-                        "toolTip": "The admin user of the Database",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^(?!\\s*$).+",
-                            "validationMessage": "The value must not be empty."
-                        }
-                    },
-                    {
-                        "name": "databaseLoginPassword",
-                        "type": "Microsoft.Common.PasswordBox",
-                        "label": {
-                            "password" : "Database Password",
-                            "confirmPassword": "Confirm Database Password"
-                        },
-                        "toolTip": "The password of the admin user of the Database",
-                        "options": {
-                            "hideConfirmation": false
-                        },
-                        "constraints": {
-                            "required": true
                         }
                     }
                 ]
@@ -513,6 +487,32 @@
                             "validationMessage": "Numeric field."
                         },
                         "visible": "[equals(steps('DatabaseConfig').databaseNewOrExisting, 'new')]"
+                    },
+                    {
+                        "name": "databaseLogin",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Database Login",
+                        "toolTip": "The admin user of the Database",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        }
+                    },
+                    {
+                        "name": "databaseLoginPassword",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password" : "Database Password",
+                            "confirmPassword": "Confirm Database Password"
+                        },
+                        "toolTip": "The password of the admin user of the Database",
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "constraints": {
+                            "required": true
+                        }
                     }
                 ]
             },
@@ -724,8 +724,6 @@
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
             "webUsername": "[steps('SecurityConfig').webUsername]",
             "webPassword": "[steps('SecurityConfig').webPassword]",
-            "databaseLogin": "[steps('SecurityConfig').databaseLogin]",
-            "databaseLoginPassword": "[steps('SecurityConfig').databaseLoginPassword]",
             "databaseNewOrExisting": "[steps('DatabaseConfig').databaseNewOrExisting]",
             "databaseType": "[steps('DatabaseConfig').databaseType]",
             "databaseServerName": "[steps('DatabaseConfig').databaseServerName]",
@@ -734,6 +732,8 @@
             "edition": "[steps('DatabaseConfig').edition]",
             "requestedServiceObjectiveName": "[coalesce(steps('DatabaseConfig').requestedServiceObjectiveNameBasic, steps('DatabaseConfig').requestedServiceObjectiveNameStandard, steps('DatabaseConfig').requestedServiceObjectiveNamePremium)]",
             "maxSizeBytes": "[steps('DatabaseConfig').maxSizeBytes]",
+            "databaseLogin": "[steps('DatabaseConfig').databaseLogin]",
+            "databaseLoginPassword": "[steps('DatabaseConfig').databaseLoginPassword]",
             "applicationGatewaySkuTier": "[steps('applicationGatewayConfig').applicationGatewaySkuTier]",
             "applicationGatewaySkuName": "[coalesce(steps('applicationGatewayConfig').applicationGatewaySkuNameStandard, steps('applicationGatewayConfig').applicationGatewaySkuNameWAF)]",
             "applicationGatewayCapacity": "[int(steps('applicationGatewayConfig').applicationGatewayCapacity)]",
