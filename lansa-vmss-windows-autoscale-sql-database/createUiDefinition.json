@@ -93,9 +93,6 @@
                 "recommendedSizes": [
                     "Standard_B4ms"
                 ],
-                "constraints": {
-                    "allowedSizes": []
-                },
                 "imageReference": {
                     "publisher": "lansa",
                     "offer": "lansa-scalable-license",
@@ -112,9 +109,6 @@
                 "recommendedSizes": [
                     "Standard_B2ms"
                 ],
-                "constraints": {
-                    "allowedSizes": []
-                },
                 "imageReference": {
                     "publisher": "lansa",
                     "offer": "lansa-scalable-license",
