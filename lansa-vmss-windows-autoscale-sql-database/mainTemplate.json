@@ -139,7 +139,7 @@
          "type": "int",
          "defaultValue": 1,
          "metadata": {
-            "description": "Minimum number of Virtual Machine instances (1 or more)."
+            "description": "Minimum number of Virtual Machine instances (1 to 600)."
          },
          "minValue": 1,
          "maxValue": 600
@@ -148,7 +148,7 @@
          "type": "int",
          "defaultValue": 100,
          "metadata": {
-            "description": "Maximum number of Virtual Machine instances (100 or less)."
+            "description": "Maximum number of Virtual Machine instances (1 to 600)."
          },
          "minValue": 1,
          "maxValue": 600
