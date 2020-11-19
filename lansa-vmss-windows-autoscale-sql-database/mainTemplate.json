@@ -95,7 +95,9 @@
          "type": "string",
          "allowedValues": [
             "Standard",
-            "WAF"
+            "Standard_v2",
+            "WAF",
+            "WAF_v2"
          ],
          "defaultValue": "Standard",
          "metadata": {
@@ -121,6 +123,33 @@
          "defaultValue": 2,
          "metadata": {
             "description": "Number of Application Gateway instances"
+         }
+      },
+      "autoScaleMinCapacity": {
+         "type": "int",
+         "defaultValue": 0,
+         "metadata": {
+            "description": "Lower bound on number of Application Gateway capacity"
+         }
+      },
+      "autoScaleMaxCapacity": {
+         "type": "int",
+         "defaultValue": 10,
+         "metadata": {
+            "description": "Upper bound on number of Application Gateway capacity"
+         }
+      },
+      "enableAutoscaling": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Application Gateway Autoscale Configuration object"
+         }
+      },
+      "availabilityZones": {
+         "type": "array",
+         "metadata": {
+            "description": "Zone numbers e.g. 1,2,3."
          }
       },
       "certificateBase64Encoded": {
@@ -341,6 +370,11 @@
    },
    "variables": {
       "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
+      "addAGName" : "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))]",
+      "autoScaleConfig" : {
+         "minCapacity": "[parameters('autoScaleMinCapacity')]",
+         "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
+      },
       "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
       "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
@@ -912,8 +946,11 @@
          "type": "Microsoft.Network/publicIPAddresses",
          "name": "[variables('agPublicIPAddressName')]",
          "location": "[parameters('location')]",
+         "sku": {
+            "name": "[if(variables('addAGName'), 'Basic', 'Standard')]"
+         },
          "properties": {
-            "publicIPAllocationMethod": "Dynamic",
+            "publicIPAllocationMethod": "[if(variables('addAGName'), 'Dynamic', 'Static')]",
             "dnsSettings": {
                "domainNameLabel": "[variables('aglongNamingInfix')]"
             }
@@ -931,8 +968,8 @@
          "properties": {
             "sku": {
                 "tier": "[parameters('applicationGatewaySkuTier')]",
-                "name": "[parameters('applicationGatewaySkuName')]",
-                "capacity": "[parameters('applicationGatewayCapacity')]"
+                "name": "[if(variables('addAGName'), parameters('applicationGatewaySkuName'), parameters('applicationGatewaySkuTier'))]",
+                "capacity": "[if(variables('addAGName'), parameters('applicationGatewayCapacity'), if(parameters('enableAutoscaling'), json('null'), parameters('applicationGatewayCapacity')))]"
             },
             "sslCertificates": [
                {
@@ -1021,8 +1058,10 @@
                      }
                   }
                }
-            ]
-         }
+            ],
+            "autoscaleConfiguration": "[if(parameters('enableAutoscaling'), variables('autoScaleConfig'), json('null'))]"
+         },
+         "zones": "[if(contains(parameters('availabilityZones'),''), json('null'), parameters('availabilityZones'))]"
       },
       {
          "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",

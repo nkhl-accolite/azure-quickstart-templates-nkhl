@@ -523,7 +523,7 @@
                         "name": "applicationGatewaySkuTier",
                         "type": "Microsoft.Common.DropDown",
                         "label": "Application Gateway SKU Tier",
-                        "toolTip": "Application Gateway SKU Tier",
+                        "toolTip": "The v2 tiers offer performance enhancements and support for some critical new features. Choose a WAF tier to support Web Application Firewall on this Application Gateway. You can upgrade to a WAF tier after the application gateway has been created. [Learn more about tier differences](https://docs.microsoft.com/en-us/azure/application-gateway/application-gateway-autoscaling-zone-redundant)",
                         "defaultValue": "Standard",
                         "constraints": {
                             "required": true,
@@ -533,8 +533,16 @@
                                     "value": "Standard"
                                 },
                                 {
+                                    "label": "Standard V2",
+                                    "value": "Standard_v2"
+                                },
+                                {
                                     "label": "WAF",
                                     "value": "WAF"
+                                },
+                                {
+                                    "label": "WAF V2",
+                                    "value": "WAF_v2"
                                 }
                             ]
                         }
@@ -584,6 +592,27 @@
                         "visible": "[equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'WAF')]"
                     },
                     {
+                        "name": "autoScalingEnabled",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Enable autoscaling",
+                        "defaultValue": "No",
+                        "toolTip": "Choose if autoscaling should be enabled or disabled",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                },
+                                {
+                                    "label": "No",
+                                    "value": false
+                                }
+                            ],
+                            "required": true
+                        },
+                        "visible": "[or(equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'Standard_v2'), equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'WAF_v2'))]"
+                    },
+                    {
                         "name": "applicationGatewayCapacity",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Application Gateway Capacity",
@@ -593,7 +622,66 @@
                             "required": true,
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
-                        }
+                        },
+                        "visible": "[not(and(or(equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'Standard_v2'), equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'WAF_v2')), equals(steps('applicationGatewayConfig').autoScalingEnabled, true)))]"
+                    },
+                    {
+                        "name": "autoScaleMinCapacity",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Minimum scale units",
+                        "toolTip": "Additional reserved capacity which is always maintained irrespective of traffic. 0 signifies purely autoscaling Application Gateway with no additional reserved capacity while still maintaining high availability of the service.",
+                        "defaultValue": "0",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('applicationGatewayConfig').autoScalingEnabled, true)]"
+                    },
+                    {
+                        "name": "autoScaleMaxCapacity",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Maximum scale units",
+                        "toolTip": "Upper bound on number of Application Gateway capacity",
+                        "defaultValue": "[int('10')]",
+                        "constraints": {
+                            "required": false,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('applicationGatewayConfig').autoScalingEnabled, true)]"
+                    },
+                    {
+                        "name": "zones",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Availability Zone",
+                        "toolTip": "Some regions support the ability to put your v2 application gateway in an availability zone (or multiple, for zone redundancy). If you are not sure, create an Application Gateway in the Portal and see if Availability Zones are listed for your Region. [Learn more about Availability Zones](https://aka.ms/aboutaz)",
+                        "placeholder": "None",
+                        "multiselect": true,
+                        "selectAll": false,
+                        "defaultValue": "",
+                        "constraints": {
+                            "required": false,
+                            "allowedValues":[
+                                {
+                                    "label": "",
+                                    "value": ""
+                                },
+                                {
+                                    "label": "Zone 1",
+                                    "value": "1"
+                                },
+                                {
+                                    "label": "Zone 2",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "Zone 3",
+                                    "value": "3"
+                                }
+                            ]
+                        },
+                        "visible": "[equals(steps('applicationGatewayConfig').autoScalingEnabled, true)]"
                     }
                 ]
             },
@@ -730,7 +818,11 @@
             "databaseLoginPassword": "[steps('DatabaseConfig').databaseLoginPassword]",
             "applicationGatewaySkuTier": "[steps('applicationGatewayConfig').applicationGatewaySkuTier]",
             "applicationGatewaySkuName": "[coalesce(steps('applicationGatewayConfig').applicationGatewaySkuNameStandard, steps('applicationGatewayConfig').applicationGatewaySkuNameWAF)]",
-            "applicationGatewayCapacity": "[int(steps('applicationGatewayConfig').applicationGatewayCapacity)]",
+            "applicationGatewayCapacity": "[int(coalesce(steps('applicationGatewayConfig').applicationGatewayCapacity, 2))]",
+            "enableAutoscaling": "[steps('applicationGatewayConfig').autoScalingEnabled]",
+            "autoScaleMinCapacity": "[int(coalesce(steps('applicationGatewayConfig').autoScaleMinCapacity, 0))]",
+            "autoScaleMaxCapacity": "[int(coalesce(steps('applicationGatewayConfig').autoScaleMaxCapacity, 10))]",
+            "availabilityZones": "[steps('applicationGatewayConfig').zones]",
             "installMSI": "[steps('InstallationOptionsConfig').installMSI]",
             "updateMSI": "[steps('InstallationOptionsConfig').updateMSI]",
             "uninstallMSI": "[steps('InstallationOptionsConfig').uninstallMSI]",
