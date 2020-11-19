@@ -148,6 +148,7 @@
       },
       "availabilityZones": {
          "type": "array",
+         "defaultValue": [""],
          "metadata": {
             "description": "Zone numbers e.g. 1,2,3."
          }
@@ -1061,7 +1062,7 @@
             ],
             "autoscaleConfiguration": "[if(parameters('enableAutoscaling'), variables('autoScaleConfig'), json('null'))]"
          },
-         "zones": "[if(contains(parameters('availabilityZones'),''), json('null'), parameters('availabilityZones'))]"
+         "zones": "[if(and(equals(parameters('enableAutoscaling'), true()), greater(length(parameters('availabilityZones')), 0)), if(contains(parameters('availabilityZones'),''), json('null'), parameters('availabilityZones')), json('null'))]"
       },
       {
          "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
