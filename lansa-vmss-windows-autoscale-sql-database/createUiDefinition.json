@@ -165,6 +165,26 @@
                 "bladeTitle": "Security",
                 "elements": [
                     {
+                        "name": "keyVaultEnabledForTemplateDeployment",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Key Vault Enabled For Template Deployment",
+                        "toolTip": "Determines whether to use Key Vault Certificate as SSL Certificate or not.",
+                        "defaultValue": "true",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "true",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "false",
+                                    "value": "false"
+                                }
+                            ]
+                        }
+                    },
+                    {
                         "name": "certificateBase64Encoded",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Certificate Base64Encoded",
@@ -173,7 +193,8 @@
                             "required": true,
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
-                        }
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]"
                     },
                     {
                         "name": "certificatePassword",
@@ -188,7 +209,36 @@
                         },
                         "constraints": {
                             "required": true
-                        }
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]"
+                    },
+                    {
+                        "name": "keyVaultCertificate",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Key Vault Certificate",
+                        "toolTip": "Base 64 encoded String representing the SSL certificate",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
+                    },
+                    {
+                        "name": "keyVaultSecret",
+                        "type": "Microsoft.Common.PasswordBox",
+                        "label": {
+                            "password" : "Key Vault Secret",
+                            "confirmPassword": "Confirm Key Vault Secret"
+                        },
+                        "toolTip": "SSL certificate password",
+                        "options": {
+                            "hideConfirmation": false
+                        },
+                        "constraints": {
+                            "required": true
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
                     },
                     {
                         "name": "adminUsername",
@@ -712,8 +762,22 @@
             "minimumInstanceCount": "[int(basics('minimumInstanceCount'))]",
             "maximumInstanceCount": "[int(basics('maximumInstanceCount'))]",
             "webServerMaxConnect": "[basics('webServerMaxConnect')]",
-            "certificateBase64Encoded": "[steps('SecurityConfig').certificateBase64Encoded]",
-            "certificatePassword": "[steps('SecurityConfig').certificatePassword]",
+            "certificateBase64Encoded": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
+                                          "type": "string",
+                                           "value": "[steps('SecurityConfig').certificateBase64Encoded]"
+                                         },
+            "certificatePassword": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
+                                     "type": "string",
+                                     "value":"[steps('SecurityConfig').certificatePassword]"
+                                    },
+            "keyVaultCertificate": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
+                                     "type": "string",
+                                     "value": "[steps('SecurityConfig').keyVaultCertificate]"
+                                    },
+            "keyVaultSecret": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
+                                     "type": "string",
+                                     "value": "[steps('SecurityConfig').keyVaultSecret]"
+                              },
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
             "webUsername": "[steps('SecurityConfig').webUsername]",
