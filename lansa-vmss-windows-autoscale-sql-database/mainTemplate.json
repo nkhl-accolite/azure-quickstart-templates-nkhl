@@ -139,14 +139,14 @@
          "defaultValue" : "",
          "metadata": {
             "description": "Base 64 encoded String representing the SSL certificate"
-         },
+         }
       },
       "certificatePassword": {
          "type": "securestring",
          "defaultValue" : "",
          "metadata": {
             "description": "SSL certificate password"
-         },
+         }
       },
       "keyVaultCertificate": {
          "type": "string",
