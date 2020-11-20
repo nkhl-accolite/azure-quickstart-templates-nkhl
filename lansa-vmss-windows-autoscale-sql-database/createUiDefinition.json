@@ -654,7 +654,7 @@
                     {
                         "name": "zones",
                         "type": "Microsoft.Common.DropDown",
-                        "label": "Availability Zone",
+                        "label": "Availability Zones",
                         "toolTip": "Some regions support the ability to put your v2 application gateway in an availability zone (or multiple, for zone redundancy). If you are not sure, create an Application Gateway in the Portal and see if Availability Zones are listed for your Region. [Learn more about Availability Zones](https://aka.ms/aboutaz)",
                         "placeholder": "None",
                         "multiselect": true,
