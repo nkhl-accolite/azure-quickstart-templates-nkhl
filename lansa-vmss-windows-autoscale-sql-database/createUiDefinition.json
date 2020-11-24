@@ -777,19 +777,19 @@
             "certificateBase64Encoded": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                           "type": "string",
                                            "value": "[steps('SecurityConfig').certificateBase64Encoded]"
-                                         },
+            },
             "certificatePassword": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
                                      "value":"[steps('SecurityConfig').certificatePassword]"
-                                    },
+            },
             "keyVaultCertificateID": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
                                      "value": "[steps('SecurityConfig').keyVaultCertificateID]"
-                                    },
+            },
             "keyVaultSecret": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
                                      "value": "[steps('SecurityConfig').keyVaultSecretID]"
-                              },
+            },
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
             "webUsername": "[steps('SecurityConfig').webUsername]",
