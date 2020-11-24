@@ -148,14 +148,20 @@
             "description": "SSL certificate password"
          }
       },
-      "keyVaultCertificate": {
+      "keyVaultName": {
+        "type": "string",
+        "metadata": {
+          "description": "The name of the keyvault that contains the secret."
+        }
+      },
+      "keyVaultCertificateID": {
          "type": "string",
          "defaultValue" : "",
          "metadata": {
             "description": "Base 64 encoded String representing the SSL certificate"
          }
       },
-      "keyVaultSecret": {
+      "keyVaultSecretID": {
          "type": "securestring",
          "defaultValue" : "",
          "metadata": {
@@ -287,7 +293,7 @@
             "description": "Admin username on all VMs."
          }
       },
-      "adminPassword": {
+      "vaultSecretID": {
          "type": "securestring",
          "metadata": {
             "description": "Admin password on all VMs."
@@ -481,6 +487,50 @@
             }
         }
       },
+	  {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "name": "dynamicSecret",
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+			"vaultCertificate": {
+              "type": "string"
+            },
+            "vaultSecret": {
+              "type": "securestring"
+            }
+          },
+          "outputs": {
+            
+          }
+        },
+		"parameters": {
+          "vaultCertificate": {
+            "reference": {
+              "keyVault": {
+                "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+					},
+              "certificateName": "[parameters('keyVaultCertificateID')]"
+				}
+			},
+			"vaultSecret": {
+            "reference": {
+              "keyVault": {
+                "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+					},
+              "secretName": "[parameters('keyVaultSecretID')]"
+				}
+			}
+		  }
+		}
+	  },
       {
          "type": "Microsoft.Network/virtualNetworks",
          "name": "[variables('virtualNetworkName')]",
@@ -703,7 +753,7 @@
                "osProfile": {
                   "computerNamePrefix": "[variables('dbvmssName')]",
                   "adminUsername": "[parameters('adminUsername')]",
-                  "adminPassword": "[parameters('adminPassword')]",
+                  "vaultSecretID": "[parameters('vaultSecretID')]",
                   "windowsConfiguration": {
                      "provisionVMAgent": true
                   }
@@ -788,7 +838,7 @@
                "osProfile": {
                   "computerNamePrefix": "[variables('namingInfix')]",
                   "adminUsername": "[parameters('adminUsername')]",
-                  "adminPassword": "[parameters('adminPassword')]",
+                  "vaultSecretID": "[parameters('vaultSecretID')]",
                   "windowsConfiguration": {
                      "provisionVMAgent": true
                   }
@@ -965,8 +1015,8 @@
                {
                   "name": "[variables('agSslCertName')]",
                   "properties": {
-                     "data": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('keyVaultCertificate'), parameters('certificateBase64Encoded')]",
-                     "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('keyVaultSecret'), parameters('certificatePassword')]"
+                     "data": ""[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultCertificate'), parameters('certificatePassword')]",
+                     "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultSecret'), parameters('certificatePassword')]"
                   }
                }
             ],
