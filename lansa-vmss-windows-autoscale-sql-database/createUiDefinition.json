@@ -594,6 +594,62 @@
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
                         }
+                    },
+                    {
+                        "name": "ipaddressNewOrExisting",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Application Gateway PublicIPAddress New/Existing",
+                        "toolTip": "Determines whether an existing IPAddress is to be used or should provide a new IP Address",
+                        "defaultValue": "new",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "new",
+                                    "value": "new"
+                                },
+                                {
+                                    "label": "existing",
+                                    "value": "existing"
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "name": "ipaddressname",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "IP Address Name",
+                        "toolTip": "Determines the name of the IP Address",
+                        "constraints":{
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('applicationGatewayConfig').ipaddressNewOrExisting, 'existing')]"
+                    },
+                    {
+                        "name": "ipaddress",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "AG Public IPAddress",
+                        "toolTip": "Value of the IP Address",
+                        "constraints":{
+                            "required": true,
+                            "regex":"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('applicationGatewayConfig').ipaddressNewOrExisting, 'existing')]"
+                    },
+                    {
+                        "name":"domain",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Domain",
+                        "toolTip": "Domain",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^((?!-)[A-Za-z0-9-]{1, 63}(?<!-)\\.)+[A-Za-z]{2, 6}$",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('applicationGatewayConfig').ipaddressNewOrExisting, 'existing')]"
                     }
                 ]
             },
@@ -731,6 +787,10 @@
             "applicationGatewaySkuTier": "[steps('applicationGatewayConfig').applicationGatewaySkuTier]",
             "applicationGatewaySkuName": "[coalesce(steps('applicationGatewayConfig').applicationGatewaySkuNameStandard, steps('applicationGatewayConfig').applicationGatewaySkuNameWAF)]",
             "applicationGatewayCapacity": "[int(steps('applicationGatewayConfig').applicationGatewayCapacity)]",
+            "ipaddressNewOrExisting":"[steps('applicationGatewayConfig').ipaddressNewOrExisting]",
+            "ipaddress":"[steps('applicationGatewayConfig').ipaddress]",
+            "ipaddressname":"[steps('applicationGatewayConfig').ipaddressname]",
+            "domain":"[steps('applicationGatewayConfig').domain]",
             "installMSI": "[steps('InstallationOptionsConfig').installMSI]",
             "updateMSI": "[steps('InstallationOptionsConfig').updateMSI]",
             "uninstallMSI": "[steps('InstallationOptionsConfig').uninstallMSI]",
