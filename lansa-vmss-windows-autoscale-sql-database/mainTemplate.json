@@ -511,25 +511,25 @@
             
           }
         },
-		"parameters": {
+	"parameters": {
           "vaultCertificate": {
             "reference": {
               "keyVault": {
                 "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
-					},
-              "certificateName": "[parameters('keyVaultCertificateID')]"
-				}
 			},
-			"vaultSecret": {
+              "certificateName": "[parameters('keyVaultCertificateID')]"
+		  }
+		},
+	  "vaultSecret": {
             "reference": {
               "keyVault": {
                 "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
-					},
+			},
               "secretName": "[parameters('keyVaultSecretID')]"
-				}
-			}
-		  }
+		    }
 		}
+	      }
+	    }
 	  },
       {
          "type": "Microsoft.Network/virtualNetworks",
