@@ -1015,7 +1015,7 @@
                {
                   "name": "[variables('agSslCertName')]",
                   "properties": {
-                     "data": ""[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultCertificate'), parameters('certificatePassword')]",
+                     "data": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultCertificate'), parameters('certificatePassword')]",
                      "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultSecret'), parameters('certificatePassword')]"
                   }
                }
