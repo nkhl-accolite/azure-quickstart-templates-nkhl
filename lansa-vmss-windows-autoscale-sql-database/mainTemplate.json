@@ -123,6 +123,54 @@
             "description": "Number of Application Gateway instances"
          }
       },
+      "agpublicIpNewOrExisting": {
+         "type": "string",
+         "defaultValue": "new",
+         "metadata": {
+           "description": "Determines whether or not a new public ip should be provisioned."
+         }
+       },
+       "agpublicIpName": {
+         "type": "string",
+         "metadata": {
+           "description": "Name of the public ip address"
+         }
+       },
+       "agpublicIpDns": {
+         "type": "string",
+         "metadata": {
+           "description": "DNS of the public ip address for the VM"
+         }
+       },
+       "agpublicIpResourceGroupName": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().name]",
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
+       "agpublicIpAllocationMethod": {
+         "type": "string",
+         "defaultValue": "Dynamic",
+         "allowedValues": [
+           "Dynamic",
+           "Static"
+         ],
+         "metadata": {
+           "description": "Allocation method for the public ip address"
+         }
+       },
+       "agpublicIpSku": {
+         "type": "string",
+         "defaultValue": "Basic",
+         "allowedValues": [
+           "Basic",
+           "Standard"
+         ],
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
       "certificateBase64Encoded": {
          "type": "string",
          "metadata": {
@@ -346,7 +394,6 @@
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "longNamingInfix": "[toLower(parameters('stackName'))]",
       "dblongNamingInfix": "[toLower(concat('db',parameters('stackName')))]",
-      "aglongNamingInfix": "[toLower(concat('ag',parameters('stackName')))]",
       "dbvmssName": "[toLower(substring(concat('db',parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "addressPrefix": "10.0.0.0/16",
       "subnetPrefix": "10.0.0.0/24",
@@ -427,18 +474,18 @@
       },
       "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
       "q": "'",
-      "agPublicIPAddressName": "[concat(variables('namingInfix'), '-agpip')]",
-      "agPublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName'))]",
+      "agPublicIPAddressName": "[parameters('agpublicIpName')]",
+      "agPublicIPAddressID": "[resourceId(parameters('publicIpResourceGroupName'),'Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName'))]",
       "agSubnetPrefix": "10.0.1.0/24",
-      "agSubnetName": "[concat(variables('namingInfix'), '-agsubnet')]",
+      "agSubnetName": "[concat(parameters('agpublicIpName').slice(0,-6), '-agsubnet')]",
       "agSubnetID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('agsubnetName'))]",
-      "agName": "[concat(variables('namingInfix'), '-ag')]",
+      "agName": "[concat(parameters('agpublicIpName').slice(0,-6), '-ag')]",
       "agHttpListenerName": "appGatewayHttpListener",
       "agFrontendIPName": "appGatewayFrontendIP",
       "agFrontendPortName": "appGatewayFrontendPort",
       "agSslCertName": "appGatewaySslCert",
       "agBackendHttpSettingsName": "appGatewayBackendHttpSettings",
-      "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]"
+      "agBackendAddressPoolName": "[concat(parameters('agpublicIpName').slice(0,-6), '-agpool')]"
    },
    "resources": [
       {
@@ -908,14 +955,18 @@
          }
       },
       {
+         "condition": "[equals(parameters('agpublicIpNeworExisting'), 'new')]",
          "apiVersion": "2019-08-01",
          "type": "Microsoft.Network/publicIPAddresses",
          "name": "[variables('agPublicIPAddressName')]",
          "location": "[parameters('location')]",
          "properties": {
-            "publicIPAllocationMethod": "Dynamic",
+            "sku": {
+               "name": "[parameters('agpublicIpSku')]"
+             },   
+            "publicIPAllocationMethod": "[parameters('agpublicIpAllocationMethod')]",
             "dnsSettings": {
-               "domainNameLabel": "[variables('aglongNamingInfix')]"
+               "domainNameLabel": "[parameters('agpublicIpDns')]"
             }
          }
       },

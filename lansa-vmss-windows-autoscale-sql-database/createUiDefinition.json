@@ -596,60 +596,33 @@
                         }
                     },
                     {
-                        "name": "ipaddressNewOrExisting",
-                        "type": "Microsoft.Common.DropDown",
-                        "label": "Application Gateway PublicIPAddress New/Existing",
-                        "toolTip": "Determines whether an existing IPAddress is to be used or should provide a new IP Address",
-                        "defaultValue": "new",
+                        "name":"publicIpAddress",
+                        "type": "Microsoft.Network.PublicIpAddressCombo",
+                        "label": {
+                            "publicIpAddress": "Application Gateway Public IP address",
+                            "domainNameLabel": "Domain name label"
+                        },
+                        "toolTip": {
+                           "publicIpAddress": "Whether to use an existing public IP Address or create a new one",
+                           "domainNameLabel": "Domain name label"
+                        },
+                        "defaultValue": { 
+                            "publicIpAddressName": "[toLower(concat(basics('stackName'),'-agpip'))]",
+                            "domainNameLabel": ""
+                        },
                         "constraints": {
-                            "required": true,
-                            "allowedValues":[
-                                {
-                                    "label": "new",
-                                    "value": "new"
-                                },
-                                {
-                                    "label": "existing",
-                                    "value": "existing"
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "name": "ipaddressname",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "IP Address Name",
-                        "toolTip": "Determines the name of the IP Address",
-                        "constraints":{
-                            "required": true,
+                            "required": {
+                                "publicIpAddress": true,
+                                "domainNameLabel": true
+                            },
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
                         },
-                        "visible": "[equals(steps('applicationGatewayConfig').ipaddressNewOrExisting, 'existing')]"
-                    },
-                    {
-                        "name": "ipaddress",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "AG Public IPAddress",
-                        "toolTip": "Value of the IP Address",
-                        "constraints":{
-                            "required": true,
-                            "regex":"^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-                            "validationMessage": "The value must not be empty."
-                        },
-                        "visible": "[equals(steps('applicationGatewayConfig').ipaddressNewOrExisting, 'existing')]"
-                    },
-                    {
-                        "name":"domain",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "Domain",
-                        "toolTip": "Domain",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^((?!-)[A-Za-z0-9-]{1, 63}(?<!-)\\.)+[A-Za-z]{2, 6}$",
-                            "validationMessage": "The value must not be empty."
-                        },
-                        "visible": "[equals(steps('applicationGatewayConfig').ipaddressNewOrExisting, 'existing')]"
+                        "options": {
+                            "hideNone": true,
+                            "hideDomainNameLabel": false,
+                            "hideExisting": false
+                        }
                     }
                 ]
             },
@@ -787,17 +760,19 @@
             "applicationGatewaySkuTier": "[steps('applicationGatewayConfig').applicationGatewaySkuTier]",
             "applicationGatewaySkuName": "[coalesce(steps('applicationGatewayConfig').applicationGatewaySkuNameStandard, steps('applicationGatewayConfig').applicationGatewaySkuNameWAF)]",
             "applicationGatewayCapacity": "[int(steps('applicationGatewayConfig').applicationGatewayCapacity)]",
-            "ipaddressNewOrExisting":"[steps('applicationGatewayConfig').ipaddressNewOrExisting]",
-            "ipaddress":"[steps('applicationGatewayConfig').ipaddress]",
-            "ipaddressname":"[steps('applicationGatewayConfig').ipaddressname]",
-            "domain":"[steps('applicationGatewayConfig').domain]",
             "installMSI": "[steps('InstallationOptionsConfig').installMSI]",
             "updateMSI": "[steps('InstallationOptionsConfig').updateMSI]",
             "uninstallMSI": "[steps('InstallationOptionsConfig').uninstallMSI]",
             "triggerWebConfig": "[steps('InstallationOptionsConfig').triggerWebConfig]",
             "gitBranch": "[steps('InstallationOptionsConfig').gitBranch]",
             "trace": "[steps('InstallationOptionsConfig').trace]",
-            "fixLicense": "[steps('InstallationOptionsConfig').fixLicense]"
+            "fixLicense": "[steps('InstallationOptionsConfig').fixLicense]",
+            "agpublicIpNewOrExisting": "[steps('applicationGatewayConfig').publicIpAddress.newOrExistingOrNone]",
+            "agpublicIpName": "[steps('applicationGatewayConfig').publicIpAddress.name]",
+            "agpublicIpDns": "[steps('applicationGatewayConfig').publicIpAddress.domainNameLabel]",
+            "agpublicIpResourceGroupName": "[steps('applicationGatewayConfig').publicIpAddress.resourceGroup]",
+            "agpublicIPAllocationMethod": "[steps('applicationGatewayConfig').publicIpAddress.publicIPAllocationMethod]",
+            "agpublicIpSku": "[steps('applicationGatewayConfig').publicIpAddress.sku]"
         }
     }
 }
