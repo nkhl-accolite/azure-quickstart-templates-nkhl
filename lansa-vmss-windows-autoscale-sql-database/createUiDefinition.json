@@ -602,7 +602,7 @@
                            "publicIpAddress": "Whether to use an existing public IP Address or create a new one",
                            "domainNameLabel": "Domain name label"
                         },
-                        "defaultValue": { 
+                        "defaultValue": {
                             "publicIpAddressName": "[toLower(concat(basics('stackName'),'-agpip'))]",
                             "domainNameLabel": "[toLower(concat('ag', basics('stackName')))]"
                         },

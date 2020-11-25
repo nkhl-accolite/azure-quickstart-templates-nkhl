@@ -507,15 +507,15 @@
       "agPublicIPAddressName": "[parameters('agpublicIpName')]",
       "agPublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName'))]",
       "agSubnetPrefix": "10.0.1.0/24",
-      "agSubnetName": "[toLower(concat(variables('namingInfix'), '-agsubnet'))]",
+      "agSubnetName": "[concat(variables('namingInfix'), '-agsubnet')]",
       "agSubnetID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('agsubnetName'))]",
-      "agName": "[toLower(concat(variables('namingInfix'), '-ag'))]",
+      "agName": "[concat(variables('namingInfix'), '-ag')]",
       "agHttpListenerName": "appGatewayHttpListener",
       "agFrontendIPName": "appGatewayFrontendIP",
       "agFrontendPortName": "appGatewayFrontendPort",
       "agSslCertName": "appGatewaySslCert",
       "agBackendHttpSettingsName": "appGatewayBackendHttpSettings",
-      "agBackendAddressPoolName": "[toLower(concat(variables('namingInfix'), '-agpool'))]"
+      "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]"
    },
    "resources": [
       {
@@ -990,10 +990,10 @@
          "type": "Microsoft.Network/publicIPAddresses",
          "name": "[variables('agPublicIPAddressName')]",
          "location": "[parameters('location')]",
+         "sku": {
+            "name": "[parameters('agpublicIpSku')]"
+         },
          "properties": {
-            "sku": {
-               "name": "[parameters('agpublicIpSku')]"
-             },   
             "publicIPAllocationMethod": "[parameters('agpublicIpAllocationMethod')]",
             "dnsSettings": {
                "domainNameLabel": "[parameters('agpublicIpDns')]"
