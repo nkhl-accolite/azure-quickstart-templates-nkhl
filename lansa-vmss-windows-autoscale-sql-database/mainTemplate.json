@@ -414,7 +414,7 @@
    },
    "variables": {
       "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
-      "addAGName" : "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))",
+      "addAGName" : "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))]",
       "autoScaleConfig" : {
          "minCapacity": "[parameters('autoScaleMinCapacity')]",
          "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
