@@ -95,7 +95,9 @@
          "type": "string",
          "allowedValues": [
             "Standard",
-            "WAF"
+            "Standard_v2",
+            "WAF",
+            "WAF_v2"
          ],
          "defaultValue": "Standard",
          "metadata": {
@@ -132,21 +134,16 @@
        },
        "agpublicIpName": {
          "type": "string",
+         "defaultValue":"[toLower(concat(parameters('stackName'),'-agpip'))]",
          "metadata": {
            "description": "Name of the public ip address"
          }
        },
        "agpublicIpDns": {
          "type": "string",
+         "defaultValue": "[toLower(concat('ag',parameters('stackName')))]",
          "metadata": {
            "description": "DNS of the public ip address for the VM"
-         }
-       },
-       "agpublicIpResourceGroupName": {
-         "type": "string",
-         "defaultValue": "[resourceGroup().name]",
-         "metadata": {
-           "description": "Name of the resource group for the public ip address"
          }
        },
        "agpublicIpAllocationMethod": {
@@ -171,6 +168,34 @@
            "description": "Name of the resource group for the public ip address"
          }
        },
+      "autoScaleMinCapacity": {
+         "type": "int",
+         "defaultValue": 0,
+         "metadata": {
+            "description": "Lower bound on number of Application Gateway capacity"
+         }
+      },
+      "autoScaleMaxCapacity": {
+         "type": "int",
+         "defaultValue": 10,
+         "metadata": {
+            "description": "Upper bound on number of Application Gateway capacity"
+         }
+      },
+      "enableAutoscaling": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Application Gateway Autoscale Configuration object"
+         }
+      },
+      "availabilityZones": {
+         "type": "array",
+         "defaultValue": [""],
+         "metadata": {
+            "description": "Zone numbers e.g. 1,2,3."
+         }
+      },
       "certificateBase64Encoded": {
          "type": "string",
          "metadata": {
@@ -389,11 +414,16 @@
    },
    "variables": {
       "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
+      "autoScaleConfig" : {
+         "minCapacity": "[parameters('autoScaleMinCapacity')]",
+         "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
+      },
       "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
       "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "longNamingInfix": "[toLower(parameters('stackName'))]",
       "dblongNamingInfix": "[toLower(concat('db',parameters('stackName')))]",
+      "aglongNamingInfix": "[toLower(concat('ag',parameters('stackName')))]",
       "dbvmssName": "[toLower(substring(concat('db',parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "addressPrefix": "10.0.0.0/16",
       "subnetPrefix": "10.0.0.0/24",
@@ -475,17 +505,17 @@
       "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
       "q": "'",
       "agPublicIPAddressName": "[parameters('agpublicIpName')]",
-      "agPublicIPAddressID": "[resourceId(parameters('publicIpResourceGroupName'),'Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName'))]",
+      "agPublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('agpublicIpName'))]",
       "agSubnetPrefix": "10.0.1.0/24",
-      "agSubnetName": "[concat(parameters('agpublicIpName').slice(0,-6), '-agsubnet')]",
+      "agSubnetName": "[toLower(concat(parameters('stackName'), '-agsubnet'))]",
       "agSubnetID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('agsubnetName'))]",
-      "agName": "[concat(parameters('agpublicIpName').slice(0,-6), '-ag')]",
+      "agName": "[toLower(concat(parameters('stackName'), '-ag'))]",
       "agHttpListenerName": "appGatewayHttpListener",
       "agFrontendIPName": "appGatewayFrontendIP",
       "agFrontendPortName": "appGatewayFrontendPort",
       "agSslCertName": "appGatewaySslCert",
       "agBackendHttpSettingsName": "appGatewayBackendHttpSettings",
-      "agBackendAddressPoolName": "[concat(parameters('agpublicIpName').slice(0,-6), '-agpool')]"
+      "agBackendAddressPoolName": "[toLower(concat(parameters('stackName'), '-agpool'))]"
    },
    "resources": [
       {
@@ -966,7 +996,7 @@
              },   
             "publicIPAllocationMethod": "[parameters('agpublicIpAllocationMethod')]",
             "dnsSettings": {
-               "domainNameLabel": "[parameters('agpublicIpDns')]"
+               "domainNameLabel": "[variables('aglongNamingInfix')]"
             }
          }
       },
@@ -982,8 +1012,8 @@
          "properties": {
             "sku": {
                 "tier": "[parameters('applicationGatewaySkuTier')]",
-                "name": "[parameters('applicationGatewaySkuName')]",
-                "capacity": "[parameters('applicationGatewayCapacity')]"
+                "name": "[if(variables('addAGName'), parameters('applicationGatewaySkuName'), parameters('applicationGatewaySkuTier'))]",
+                "capacity": "[if(variables('addAGName'), parameters('applicationGatewayCapacity'), if(parameters('enableAutoscaling'), json('null'), parameters('applicationGatewayCapacity')))]"
             },
             "sslCertificates": [
                {
@@ -1072,8 +1102,10 @@
                      }
                   }
                }
-            ]
-         }
+            ],
+            "autoscaleConfiguration": "[if(parameters('enableAutoscaling'), variables('autoScaleConfig'), json('null'))]"
+         },
+         "zones": "[if(and(equals(parameters('enableAutoscaling'), true()), greater(length(parameters('availabilityZones')), 0)), if(contains(parameters('availabilityZones'),''), json('null'), parameters('availabilityZones')), json('null'))]"
       },
       {
          "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
