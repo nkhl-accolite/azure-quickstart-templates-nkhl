@@ -172,14 +172,14 @@
          "type": "int",
          "defaultValue": 0,
          "metadata": {
-            "description": "Lower bound on number of Application Gateway capacity"
+            "description": "Lower bound on Application Gateway capacity"
          }
       },
       "autoScaleMaxCapacity": {
          "type": "int",
          "defaultValue": 10,
          "metadata": {
-            "description": "Upper bound on number of Application Gateway capacity"
+            "description": "Upper bound on Application Gateway capacity"
          }
       },
       "enableAutoscaling": {
@@ -414,6 +414,7 @@
    },
    "variables": {
       "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
+      "addAGName" : "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))",
       "autoScaleConfig" : {
          "minCapacity": "[parameters('autoScaleMinCapacity')]",
          "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
@@ -423,7 +424,6 @@
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "longNamingInfix": "[toLower(parameters('stackName'))]",
       "dblongNamingInfix": "[toLower(concat('db',parameters('stackName')))]",
-      "aglongNamingInfix": "[toLower(concat('ag',parameters('stackName')))]",
       "dbvmssName": "[toLower(substring(concat('db',parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "addressPrefix": "10.0.0.0/16",
       "subnetPrefix": "10.0.0.0/24",
@@ -505,17 +505,17 @@
       "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
       "q": "'",
       "agPublicIPAddressName": "[parameters('agpublicIpName')]",
-      "agPublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('agpublicIpName'))]",
+      "agPublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName'))]",
       "agSubnetPrefix": "10.0.1.0/24",
-      "agSubnetName": "[toLower(concat(parameters('stackName'), '-agsubnet'))]",
+      "agSubnetName": "[toLower(concat(variables('namingInfix'), '-agsubnet'))]",
       "agSubnetID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('agsubnetName'))]",
-      "agName": "[toLower(concat(parameters('stackName'), '-ag'))]",
+      "agName": "[toLower(concat(variables('namingInfix'), '-ag'))]",
       "agHttpListenerName": "appGatewayHttpListener",
       "agFrontendIPName": "appGatewayFrontendIP",
       "agFrontendPortName": "appGatewayFrontendPort",
       "agSslCertName": "appGatewaySslCert",
       "agBackendHttpSettingsName": "appGatewayBackendHttpSettings",
-      "agBackendAddressPoolName": "[toLower(concat(parameters('stackName'), '-agpool'))]"
+      "agBackendAddressPoolName": "[toLower(concat(variables('namingInfix'), '-agpool'))]"
    },
    "resources": [
       {
@@ -996,7 +996,7 @@
              },   
             "publicIPAllocationMethod": "[parameters('agpublicIpAllocationMethod')]",
             "dnsSettings": {
-               "domainNameLabel": "[variables('aglongNamingInfix')]"
+               "domainNameLabel": "[parameters('agpublicIpDns')]"
             }
          }
       },

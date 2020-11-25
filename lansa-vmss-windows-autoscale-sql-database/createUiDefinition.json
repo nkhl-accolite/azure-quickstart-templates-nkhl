@@ -608,11 +608,8 @@
                         },
                         "constraints": {
                             "required": {
-                                "publicIpAddress": true,
                                 "domainNameLabel": true
-                            },
-                            "regex": "^(?!\\s*$).+",
-                            "validationMessage": "The value must not be empty."
+                            }
                         },
                         "options": {
                             "hideNone": true,
@@ -626,7 +623,7 @@
                         "visible": "[and(or(equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'Standard_v2'), equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'WAF_v2')), equals(steps('applicationGatewayConfig').publicIpAddress.sku, 'Basic'))]",
                         "options": {
                         "icon": "Error",
-                        "text": "For v2 tiers, please create Public IP Address with SKU as Dynamic."
+                        "text": "For v2 tiers, please create Public IP Address with SKU as Standard."
                         }
                     },
                     {
@@ -680,7 +677,7 @@
                         "name": "autoScaleMaxCapacity",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Maximum scale units",
-                        "toolTip": "Upper bound on number of Application Gateway capacity",
+                        "toolTip": "Upper bound on Application Gateway capacity",
                         "defaultValue": "[int('10')]",
                         "constraints": {
                             "required": false,
