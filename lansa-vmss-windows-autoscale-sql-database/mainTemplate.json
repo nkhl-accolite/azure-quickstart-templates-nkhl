@@ -570,8 +570,36 @@
                   }
                }
             }
+<<<<<<< HEAD
          }
       },
+=======
+          },
+          "outputs": {
+            
+          }
+        },
+	"parameters": {
+          "vaultCertificate": {
+            "reference": {
+              "keyVault": {
+                "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+			},
+              "certificateName": "[parameters('keyVaultCertificateID')]"
+		  }
+		},
+	  "vaultSecret": {
+            "reference": {
+              "keyVault": {
+                "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+			},
+              "secretName": "[parameters('keyVaultSecretID')]"
+		    }
+		}
+	      }
+	    }
+	  },
+>>>>>>> b9e2886073eb2dd36618f75d5fcb2779491c335b
       {
          "type": "Microsoft.Network/virtualNetworks",
          "name": "[variables('virtualNetworkName')]",
@@ -1059,8 +1087,13 @@
                {
                   "name": "[variables('agSslCertName')]",
                   "properties": {
+<<<<<<< HEAD
                      "data": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), reference('dynamicSecret').outputs.kvCert.value, parameters('certificateBase64Encoded')]",
                      "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), reference('dynamicSecret').outputs.kvSecret.value, parameters('certificatePassword')]"
+=======
+                     "data": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultCertificate'), parameters('certificatePassword')]",
+                     "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultSecret'), parameters('certificatePassword')]"
+>>>>>>> b9e2886073eb2dd36618f75d5fcb2779491c335b
                   }
                }
             ],
