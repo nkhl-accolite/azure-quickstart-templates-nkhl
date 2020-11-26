@@ -777,11 +777,10 @@
             "certificateBase64Encoded": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                           "type": "string",
                                            "value": "[steps('SecurityConfig').certificateBase64Encoded]"
-            },
+                                         },
             "certificatePassword": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
                                      "value":"[steps('SecurityConfig').certificatePassword]"
-<<<<<<< HEAD
                                     },
             "keyVaultCertificateName": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
@@ -791,17 +790,6 @@
                                      "type": "string",
                                      "value": "[steps('SecurityConfig').keyVaultSecretName]"
                               },
-=======
-            },
-            "keyVaultCertificateID": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
-                                     "type": "string",
-                                     "value": "[steps('SecurityConfig').keyVaultCertificateID]"
-            },
-            "keyVaultSecret": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
-                                     "type": "string",
-                                     "value": "[steps('SecurityConfig').keyVaultSecretID]"
-            },
->>>>>>> b9e2886073eb2dd36618f75d5fcb2779491c335b
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
             "webUsername": "[steps('SecurityConfig').webUsername]",
