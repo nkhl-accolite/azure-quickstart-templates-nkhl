@@ -37,7 +37,6 @@
          "allowedValues": [
             "Marketplace",
             "Custom"
-
          ],
          "defaultValue": "Marketplace",
          "metadata": {
@@ -88,14 +87,16 @@
          "metadata": {
             "description": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended. Some identifiers use precisely 9 characters from this name and so it can be useful to use exactly 9. The template pads it out or truncates it as necessary to make it 9 characters long where required."
          },
-         "minLength" : 3,
+         "minLength": 3,
          "maxLength": 61
       },
       "applicationGatewaySkuTier": {
          "type": "string",
          "allowedValues": [
             "Standard",
-            "WAF"
+            "Standard_v2",
+            "WAF",
+            "WAF_v2"
          ],
          "defaultValue": "Standard",
          "metadata": {
@@ -123,6 +124,36 @@
             "description": "Number of Application Gateway instances"
          }
       },
+      "autoScaleMinCapacity": {
+         "type": "int",
+         "defaultValue": 0,
+         "metadata": {
+            "description": "Lower bound on number of Application Gateway capacity"
+         }
+      },
+      "autoScaleMaxCapacity": {
+         "type": "int",
+         "defaultValue": 10,
+         "metadata": {
+            "description": "Upper bound on number of Application Gateway capacity"
+         }
+      },
+      "enableAutoscaling": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Application Gateway Autoscale Configuration object"
+         }
+      },
+      "availabilityZones": {
+         "type": "array",
+         "defaultValue": [
+            ""
+         ],
+         "metadata": {
+            "description": "Zone numbers e.g. 1,2,3."
+         }
+      },
       "keyVaultEnabledForTemplateDeployment": {
          "type": "string",
          "defaultValue": "true",
@@ -136,34 +167,34 @@
       },
       "certificateBase64Encoded": {
          "type": "string",
-         "defaultValue" : "",
+         "defaultValue": "",
          "metadata": {
             "description": "Base 64 encoded String representing the SSL certificate"
          }
       },
       "certificatePassword": {
          "type": "securestring",
-         "defaultValue" : "",
+         "defaultValue": "",
          "metadata": {
             "description": "SSL certificate password"
          }
       },
       "keyVaultName": {
-        "type": "string",
-        "metadata": {
-          "description": "The name of the keyvault that contains the secret."
-        }
-      },
-      "keyVaultCertificateID": {
          "type": "string",
-         "defaultValue" : "",
+         "metadata": {
+            "description": "The name of the keyvault that contains the secret."
+         }
+      },
+      "keyVaultCertificateName": {
+         "type": "string",
+         "defaultValue": "",
          "metadata": {
             "description": "Base 64 encoded String representing the SSL certificate"
          }
       },
-      "keyVaultSecretID": {
+      "keyVaultSecretName": {
          "type": "securestring",
-         "defaultValue" : "",
+         "defaultValue": "",
          "metadata": {
             "description": "SSL certificate password"
          }
@@ -187,15 +218,15 @@
          "maxValue": 600
       },
       "databaseNewOrExisting": {
-        "type": "string",
-        "defaultValue": "new",
-        "allowedValues": [
+         "type": "string",
+         "defaultValue": "new",
+         "allowedValues": [
             "new",
             "existing"
          ],
-        "metadata": {
-          "description": "Determines whether a new SQL database should be provisioned or to use an existing database. Parameters which are relevant to choosing 'new' are prefixed 'New DB'. Parameters which are relevant to choosing 'existing' are prefixed 'Existing DB'."
-        }
+         "metadata": {
+            "description": "Determines whether a new SQL database should be provisioned or to use an existing database. Parameters which are relevant to choosing 'new' are prefixed 'New DB'. Parameters which are relevant to choosing 'existing' are prefixed 'Existing DB'."
+         }
       },
       "databaseType": {
          "type": "string",
@@ -234,7 +265,6 @@
          "metadata": {
             "description": "The password of the admin user of the Azure SQL Database"
          }
-
       },
       "collation": {
          "type": "string",
@@ -293,7 +323,7 @@
             "description": "Admin username on all VMs."
          }
       },
-      "vaultSecretID": {
+      "adminPassword": {
          "type": "securestring",
          "metadata": {
             "description": "Admin password on all VMs."
@@ -374,6 +404,11 @@
    },
    "variables": {
       "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
+      "addAGName": "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))]",
+      "autoScaleConfig": {
+         "minCapacity": "[parameters('autoScaleMinCapacity')]",
+         "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
+      },
       "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
       "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
@@ -432,7 +467,6 @@
             "version": {
                "V15 GA": {
                   "sku": "w12r2d-15-0"
-
                },
                "V14 SP2": {
                   "sku": "lansa-scalable-license-14-2"
@@ -453,7 +487,7 @@
          "id": "[parameters('imageId')]"
       },
       "imageReference": "[if(variables('isCustomImage'), variables('imageResourceId'), variables('osType'))]",
-      "imagePlan" : {
+      "imagePlan": {
          "name": "[variables('imageSKU')]",
          "product": "[variables('imageOfferName')]",
          "publisher": "[variables('imagePublisher')]"
@@ -475,62 +509,69 @@
    },
    "resources": [
       {
-        "apiVersion": "2020-06-01",
-        "name": "pid-5990c833-d17a-5616-8ab3-144d90fea6e9",
-        "type": "Microsoft.Resources/deployments",
-        "properties": {
+         "apiVersion": "2020-06-01",
+         "name": "pid-5990c833-d17a-5616-8ab3-144d90fea6e9",
+         "type": "Microsoft.Resources/deployments",
+         "properties": {
             "mode": "Incremental",
             "template": {
-                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                "contentVersion": "1.0.0.0",
-                "resources": []
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": []
             }
-        }
+         }
       },
-	  {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2018-05-01",
-      "name": "dynamicSecret",
-      "properties": {
-        "mode": "Incremental",
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {
-			"vaultCertificate": {
-              "type": "string"
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "2018-05-01",
+         "name": "dynamicSecret",
+         "properties": {
+            "mode": "Incremental",
+            "expressionEvaluationOptions": {
+               "scope": "inner"
             },
-            "vaultSecret": {
-              "type": "securestring"
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "parameters": {
+                  "vaultCertificate": {
+                     "type": "string"
+                  },
+                  "vaultSecret": {
+                     "type": "securestring"
+                  }
+               },
+               "outputs": {
+                  "kvCert": {
+                     "value": "[parameters('vaultCertificate')]",
+                     "type": "string"
+                  },
+                  "kvSecret": {
+                     "value": "[parameters('vaultSecret')]",
+                     "type": "securestring"
+                  }
+               }
+            },
+            "parameters": {
+               "vaultCertificate": {
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                     },
+                     "certificateName": "[parameters('keyVaultCertificateName')]"
+                  }
+               },
+               "vaultSecret": {
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultSecretName')]"
+                  }
+               }
             }
-          },
-          "outputs": {
-            
-          }
-        },
-		"parameters": {
-          "vaultCertificate": {
-            "reference": {
-              "keyVault": {
-                "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
-					},
-              "certificateName": "[parameters('keyVaultCertificateID')]"
-				}
-			},
-			"vaultSecret": {
-            "reference": {
-              "keyVault": {
-                "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
-					},
-              "secretName": "[parameters('keyVaultSecretID')]"
-				}
-			}
-		  }
-		}
-	  },
+         }
+      },
       {
          "type": "Microsoft.Network/virtualNetworks",
          "name": "[variables('virtualNetworkName')]",
@@ -753,7 +794,7 @@
                "osProfile": {
                   "computerNamePrefix": "[variables('dbvmssName')]",
                   "adminUsername": "[parameters('adminUsername')]",
-                  "vaultSecretID": "[parameters('vaultSecretID')]",
+                  "adminPassword": "[parameters('adminPassword')]",
                   "windowsConfiguration": {
                      "provisionVMAgent": true
                   }
@@ -838,7 +879,7 @@
                "osProfile": {
                   "computerNamePrefix": "[variables('namingInfix')]",
                   "adminUsername": "[parameters('adminUsername')]",
-                  "vaultSecretID": "[parameters('vaultSecretID')]",
+                  "adminPassword": "[parameters('adminPassword')]",
                   "windowsConfiguration": {
                      "provisionVMAgent": true
                   }
@@ -854,13 +895,13 @@
                                  "name": "[variables('ipConfigName')]",
                                  "properties": {
                                     "subnet": {
-                                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
-                                     },
-                                     "loadBalancerBackendAddressPools": [
-                                        {
-                                           "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('bePoolName'))]"
-                                        }
-                                     ],
+                                       "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+                                    },
+                                    "loadBalancerBackendAddressPools": [
+                                       {
+                                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('bePoolName'))]"
+                                       }
+                                    ],
                                     "loadBalancerInboundNatPools": [
                                        {
                                           "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', variables('loadBalancerName'), variables('natPoolName'))]"
@@ -989,8 +1030,11 @@
          "type": "Microsoft.Network/publicIPAddresses",
          "name": "[variables('agPublicIPAddressName')]",
          "location": "[parameters('location')]",
+         "sku": {
+            "name": "[if(variables('addAGName'), 'Basic', 'Standard')]"
+         },
          "properties": {
-            "publicIPAllocationMethod": "Dynamic",
+            "publicIPAllocationMethod": "[if(variables('addAGName'), 'Dynamic', 'Static')]",
             "dnsSettings": {
                "domainNameLabel": "[variables('aglongNamingInfix')]"
             }
@@ -1007,16 +1051,16 @@
          ],
          "properties": {
             "sku": {
-                "tier": "[parameters('applicationGatewaySkuTier')]",
-                "name": "[parameters('applicationGatewaySkuName')]",
-                "capacity": "[parameters('applicationGatewayCapacity')]"
+               "tier": "[parameters('applicationGatewaySkuTier')]",
+               "name": "[if(variables('addAGName'), parameters('applicationGatewaySkuName'), parameters('applicationGatewaySkuTier'))]",
+               "capacity": "[if(variables('addAGName'), parameters('applicationGatewayCapacity'), if(parameters('enableAutoscaling'), json('null'), parameters('applicationGatewayCapacity')))]"
             },
             "sslCertificates": [
                {
                   "name": "[variables('agSslCertName')]",
                   "properties": {
-                     "data": ""[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultCertificate'), parameters('certificatePassword')]",
-                     "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), parameters('vaultSecret'), parameters('certificatePassword')]"
+                     "data": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), reference('dynamicSecret').outputs.kvCert.value, parameters('certificateBase64Encoded')]",
+                     "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), reference('dynamicSecret').outputs.kvSecret.value, parameters('certificatePassword')]"
                   }
                }
             ],
@@ -1070,7 +1114,6 @@
                   "properties": {
                      "FrontendIPConfiguration": {
                         "Id": "[resourceId('Microsoft.Network/applicationgateways/frontendIPConfigurations',variables('agName'),variables('agFrontendIPName'))]"
-
                      },
                      "FrontendPort": {
                         "Id": "[resourceId('Microsoft.Network/applicationgateways/frontendPorts',variables('agName'),variables('agFrontendPortName'))]"
@@ -1098,8 +1141,10 @@
                      }
                   }
                }
-            ]
-         }
+            ],
+            "autoscaleConfiguration": "[if(parameters('enableAutoscaling'), variables('autoScaleConfig'), json('null'))]"
+         },
+         "zones": "[if(and(equals(parameters('enableAutoscaling'), true()), greater(length(parameters('availabilityZones')), 0)), if(contains(parameters('availabilityZones'),''), json('null'), parameters('availabilityZones')), json('null'))]"
       },
       {
          "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",

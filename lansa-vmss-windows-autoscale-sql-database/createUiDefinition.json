@@ -216,7 +216,7 @@
                         "name": "keyVaultName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Key Vault Name",
-                        "toolTip": "The name of the keyvault that contains the secret.",
+                        "toolTip": "The name of the keyvault that contains the Certificate and Secret.",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
@@ -225,10 +225,10 @@
                         "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
                     },
                     {
-                        "name": "keyVaultCertificateID",
+                        "name": "keyVaultCertificateName",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Key Vault Certificate ID",
-                        "toolTip": "Base 64 encoded String representing the SSL certificate",
+                        "label": "Key Vault Certificate Name",
+                        "toolTip": "Name of the certificate stored in Key Vault",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
@@ -237,13 +237,13 @@
                         "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
                     },
                     {
-                        "name": "keyVaultSecretID",
+                        "name": "keyVaultSecretName",
                         "type": "Microsoft.Common.PasswordBox",
                         "label": {
-                            "password" : "Key Vault Secret ID",
-                            "confirmPassword": "Confirm Key Vault Secret ID"
+                            "password" : "Key Vault Secret Name",
+                            "confirmPassword": "Confirm Secret Name"
                         },
-                        "toolTip": "SSL certificate password",
+                        "toolTip": "Name of the Secret stored in Key Vault",
                         "options": {
                             "hideConfirmation": false
                         },
@@ -782,13 +782,13 @@
                                      "type": "string",
                                      "value":"[steps('SecurityConfig').certificatePassword]"
                                     },
-            "keyVaultCertificateID": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
+            "keyVaultCertificateName": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
-                                     "value": "[steps('SecurityConfig').keyVaultCertificateID]"
+                                     "value": "[steps('SecurityConfig').keyVaultCertificateName]"
                                     },
-            "keyVaultSecret": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
+            "keyVaultSecretName": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
-                                     "value": "[steps('SecurityConfig').keyVaultSecretID]"
+                                     "value": "[steps('SecurityConfig').keyVaultSecretName]"
                               },
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
