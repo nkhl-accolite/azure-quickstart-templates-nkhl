@@ -146,6 +146,13 @@
            "description": "DNS of the public ip address for the VM"
          }
        },
+       "agpublicIpResourceGroupName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
        "agpublicIpAllocationMethod": {
          "type": "string",
          "defaultValue": "Dynamic",
@@ -504,8 +511,10 @@
       },
       "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
       "q": "'",
+      "isAgPublicIPNew": "[equals(parameters('agpublicIpNewOrExisting'), 'new')]",
       "agPublicIPAddressName": "[parameters('agpublicIpName')]",
-      "agPublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName'))]",
+      "agPublicIPAddressID": "[if(variables('isAgPublicIPNew'), resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName')), resourceId(parameters('agpublicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName')))]",
+      "agResourceDependsOn": "[if(variables('isAgPublicIPNew'), resourceId('Microsoft.Network/publicIPAddresses', variables('agPublicIPAddressName')), json('null'))]",
       "agSubnetPrefix": "10.0.1.0/24",
       "agSubnetName": "[concat(variables('namingInfix'), '-agsubnet')]",
       "agSubnetID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('agsubnetName'))]",
@@ -985,7 +994,7 @@
          }
       },
       {
-         "condition": "[equals(parameters('agpublicIpNeworExisting'), 'new')]",
+         "condition": "[variables('isAgPublicIPNew')]",
          "apiVersion": "2019-08-01",
          "type": "Microsoft.Network/publicIPAddresses",
          "name": "[variables('agPublicIPAddressName')]",
@@ -1007,7 +1016,7 @@
          "location": "[parameters('location')]",
          "dependsOn": [
             "[ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-            "[ResourceId('Microsoft.Network/publicIPAddresses', variables('agPublicIPAddressName'))]"
+            "[coalesce(variables('agResourceDependsOn'), ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')))]"
          ],
          "properties": {
             "sku": {
@@ -1173,7 +1182,7 @@
       },
       "lbFqdn": {
          "type": "string",
-         "value": "[concat('https://', reference(variables('agPublicIPAddressName')).dnsSettings.fqdn)]"
+         "value": "[if(variables('isAgPublicIPNew'), concat('https://', reference(variables('agPublicIPAddressID')).dnsSettings.fqdn), concat('https://', reference(variables('agPublicIPAddressID'), '2018-07-01').dnsSettings.fqdn))]"
       },
       "dbrdpAddress": {
          "type": "string",

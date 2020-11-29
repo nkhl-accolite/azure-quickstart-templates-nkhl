@@ -857,6 +857,7 @@
             "agpublicIpNewOrExisting": "[steps('applicationGatewayConfig').publicIpAddress.newOrExistingOrNone]",
             "agpublicIpName": "[steps('applicationGatewayConfig').publicIpAddress.name]",
             "agpublicIpDns": "[steps('applicationGatewayConfig').publicIpAddress.domainNameLabel]",
+            "agpublicIpResourceGroupName": "[steps('applicationGatewayConfig').publicIpAddress.resourceGroup]",
             "agpublicIPAllocationMethod": "[steps('applicationGatewayConfig').publicIpAddress.publicIPAllocationMethod]",
             "agpublicIpSku": "[steps('applicationGatewayConfig').publicIpAddress.sku]",
             "enableAutoscaling": "[steps('applicationGatewayConfig').autoScalingEnabled]",
