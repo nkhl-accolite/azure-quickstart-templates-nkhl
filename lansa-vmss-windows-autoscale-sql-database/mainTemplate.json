@@ -125,18 +125,68 @@
             "description": "Number of Application Gateway instances"
          }
       },
+      "agpublicIpNewOrExisting": {
+         "type": "string",
+         "defaultValue": "new",
+         "metadata": {
+           "description": "Determines whether or not a new public ip should be provisioned."
+         }
+       },
+       "agpublicIpName": {
+         "type": "string",
+         "defaultValue":"[toLower(concat(parameters('stackName'),'-agpip'))]",
+         "metadata": {
+           "description": "Name of the public ip address"
+         }
+       },
+       "agpublicIpDns": {
+         "type": "string",
+         "defaultValue": "[toLower(concat('ag',parameters('stackName')))]",
+         "metadata": {
+           "description": "DNS of the public ip address for the VM"
+         }
+       },
+       "agpublicIpResourceGroupName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
+       "agpublicIpAllocationMethod": {
+         "type": "string",
+         "defaultValue": "Dynamic",
+         "allowedValues": [
+           "Dynamic",
+           "Static"
+         ],
+         "metadata": {
+           "description": "Allocation method for the public ip address"
+         }
+       },
+       "agpublicIpSku": {
+         "type": "string",
+         "defaultValue": "Basic",
+         "allowedValues": [
+           "Basic",
+           "Standard"
+         ],
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
       "autoScaleMinCapacity": {
          "type": "int",
          "defaultValue": 0,
          "metadata": {
-            "description": "Lower bound on number of Application Gateway capacity"
+            "description": "Lower bound on Application Gateway capacity"
          }
       },
       "autoScaleMaxCapacity": {
          "type": "int",
          "defaultValue": 10,
          "metadata": {
-            "description": "Upper bound on number of Application Gateway capacity"
+            "description": "Upper bound on Application Gateway capacity"
          }
       },
       "enableAutoscaling": {
@@ -382,7 +432,6 @@
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "longNamingInfix": "[toLower(parameters('stackName'))]",
       "dblongNamingInfix": "[toLower(concat('db',parameters('stackName')))]",
-      "aglongNamingInfix": "[toLower(concat('ag',parameters('stackName')))]",
       "dbvmssName": "[toLower(substring(concat('db',parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "addressPrefix": "10.0.0.0/16",
       "subnetPrefix": "10.0.0.0/24",
@@ -463,8 +512,10 @@
       },
       "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
       "q": "'",
-      "agPublicIPAddressName": "[concat(variables('namingInfix'), '-agpip')]",
-      "agPublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName'))]",
+      "isAgPublicIPNew": "[equals(parameters('agpublicIpNewOrExisting'), 'new')]",
+      "agPublicIPAddressName": "[parameters('agpublicIpName')]",
+      "agPublicIPAddressID": "[if(variables('isAgPublicIPNew'), resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName')), resourceId(parameters('agpublicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName')))]",
+      "agResourceDependsOn": "[if(variables('isAgPublicIPNew'), resourceId('Microsoft.Network/publicIPAddresses', variables('agPublicIPAddressName')), json('null'))]",
       "agSubnetPrefix": "10.0.1.0/24",
       "agSubnetName": "[concat(variables('namingInfix'), '-agsubnet')]",
       "agSubnetID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('agsubnetName'))]",
@@ -944,17 +995,18 @@
          }
       },
       {
+         "condition": "[variables('isAgPublicIPNew')]",
          "apiVersion": "2019-08-01",
          "type": "Microsoft.Network/publicIPAddresses",
          "name": "[variables('agPublicIPAddressName')]",
          "location": "[parameters('location')]",
          "sku": {
-            "name": "[if(variables('addAGName'), 'Basic', 'Standard')]"
+            "name": "[parameters('agpublicIpSku')]"
          },
          "properties": {
-            "publicIPAllocationMethod": "[if(variables('addAGName'), 'Dynamic', 'Static')]",
+            "publicIPAllocationMethod": "[parameters('agpublicIpAllocationMethod')]",
             "dnsSettings": {
-               "domainNameLabel": "[variables('aglongNamingInfix')]"
+               "domainNameLabel": "[parameters('agpublicIpDns')]"
             }
          }
       },
@@ -965,7 +1017,7 @@
          "location": "[parameters('location')]",
          "dependsOn": [
             "[ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-            "[ResourceId('Microsoft.Network/publicIPAddresses', variables('agPublicIPAddressName'))]"
+            "[coalesce(variables('agResourceDependsOn'), ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')))]"
          ],
          "properties": {
             "sku": {
@@ -1131,7 +1183,7 @@
       },
       "lbFqdn": {
          "type": "string",
-         "value": "[concat('https://', reference(variables('agPublicIPAddressName')).dnsSettings.fqdn)]"
+         "value": "[if(variables('isAgPublicIPNew'), concat('https://', reference(variables('agPublicIPAddressID')).dnsSettings.fqdn), concat('https://', reference(variables('agPublicIPAddressID'), '2018-07-01').dnsSettings.fqdn))]"
       },
       "dbrdpAddress": {
          "type": "string",

@@ -592,6 +592,41 @@
                         "visible": "[equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'WAF')]"
                     },
                     {
+                        "name":"publicIpAddress",
+                        "type": "Microsoft.Network.PublicIpAddressCombo",
+                        "label": {
+                            "publicIpAddress": "Application Gateway Public IP address",
+                            "domainNameLabel": "Domain name label"
+                        },
+                        "toolTip": {
+                           "publicIpAddress": "Whether to use an existing public IP Address or create a new one",
+                           "domainNameLabel": "Domain name label"
+                        },
+                        "defaultValue": {
+                            "publicIpAddressName": "[toLower(concat(basics('stackName'),'-agpip'))]",
+                            "domainNameLabel": "[toLower(concat('ag', basics('stackName')))]"
+                        },
+                        "constraints": {
+                            "required": {
+                                "domainNameLabel": true
+                            }
+                        },
+                        "options": {
+                            "hideNone": true,
+                            "hideDomainNameLabel": false,
+                            "hideExisting": false
+                        }
+                    },
+                    {
+                        "name": "Error1",
+                        "type": "Microsoft.Common.InfoBox",
+                        "visible": "[and(or(equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'Standard_v2'), equals(steps('applicationGatewayConfig').applicationGatewaySkuTier, 'WAF_v2')), equals(steps('applicationGatewayConfig').publicIpAddress.sku, 'Basic'))]",
+                        "options": {
+                        "icon": "Error",
+                        "text": "For v2 tiers, please create Public IP Address with SKU as Standard."
+                        }
+                    },
+                    {
                         "name": "autoScalingEnabled",
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Enable autoscaling",
@@ -642,7 +677,7 @@
                         "name": "autoScaleMaxCapacity",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Maximum scale units",
-                        "toolTip": "Upper bound on number of Application Gateway capacity",
+                        "toolTip": "Upper bound on Application Gateway capacity",
                         "defaultValue": "[int('10')]",
                         "constraints": {
                             "required": false,
@@ -815,6 +850,12 @@
             "applicationGatewaySkuTier": "[steps('applicationGatewayConfig').applicationGatewaySkuTier]",
             "applicationGatewaySkuName": "[coalesce(steps('applicationGatewayConfig').applicationGatewaySkuNameStandard, steps('applicationGatewayConfig').applicationGatewaySkuNameWAF)]",
             "applicationGatewayCapacity": "[int(coalesce(steps('applicationGatewayConfig').applicationGatewayCapacity, 2))]",
+            "agpublicIpNewOrExisting": "[steps('applicationGatewayConfig').publicIpAddress.newOrExistingOrNone]",
+            "agpublicIpName": "[steps('applicationGatewayConfig').publicIpAddress.name]",
+            "agpublicIpDns": "[steps('applicationGatewayConfig').publicIpAddress.domainNameLabel]",
+            "agpublicIpResourceGroupName": "[steps('applicationGatewayConfig').publicIpAddress.resourceGroup]",
+            "agpublicIPAllocationMethod": "[steps('applicationGatewayConfig').publicIpAddress.publicIPAllocationMethod]",
+            "agpublicIpSku": "[steps('applicationGatewayConfig').publicIpAddress.sku]",
             "enableAutoscaling": "[steps('applicationGatewayConfig').autoScalingEnabled]",
             "autoScaleMinCapacity": "[int(coalesce(steps('applicationGatewayConfig').autoScaleMinCapacity, 0))]",
             "autoScaleMaxCapacity": "[int(coalesce(steps('applicationGatewayConfig').autoScaleMaxCapacity, 10))]",
