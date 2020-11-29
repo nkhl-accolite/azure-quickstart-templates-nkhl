@@ -147,8 +147,8 @@
          }
       },
       "availabilityZones": {
-         "type": "array",
-         "defaultValue": [""],
+         "type": "string",
+         "defaultValue": "",
          "metadata": {
             "description": "Zone numbers e.g. 1,2,3."
          }
@@ -376,6 +376,7 @@
          "minCapacity": "[parameters('autoScaleMinCapacity')]",
          "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
       },
+      "zonesArray": "[split(replace(replace(replace(parameters('availabilityZones'), '[', ''), ']', ''), '\"', ''), ',')]",
       "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
       "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
@@ -1062,7 +1063,7 @@
             ],
             "autoscaleConfiguration": "[if(parameters('enableAutoscaling'), variables('autoScaleConfig'), json('null'))]"
          },
-         "zones": "[if(and(equals(parameters('enableAutoscaling'), true()), greater(length(parameters('availabilityZones')), 0)), if(contains(parameters('availabilityZones'),''), json('null'), parameters('availabilityZones')), json('null'))]"
+         "zones": "[if(and(equals(parameters('enableAutoscaling'), true()), greater(length(variables('zonesArray')), 0)), if(contains(variables('zonesArray'),''), json('null'), variables('zonesArray')), json('null'))]"
       },
       {
          "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",

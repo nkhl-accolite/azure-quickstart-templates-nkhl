@@ -659,14 +659,10 @@
                         "placeholder": "None",
                         "multiselect": true,
                         "selectAll": false,
-                        "defaultValue": "",
+                        "defaultValue": "['']",
                         "constraints": {
                             "required": false,
                             "allowedValues":[
-                                {
-                                    "label": "",
-                                    "value": ""
-                                },
                                 {
                                     "label": "Zone 1",
                                     "value": "1"
@@ -822,7 +818,7 @@
             "enableAutoscaling": "[steps('applicationGatewayConfig').autoScalingEnabled]",
             "autoScaleMinCapacity": "[int(coalesce(steps('applicationGatewayConfig').autoScaleMinCapacity, 0))]",
             "autoScaleMaxCapacity": "[int(coalesce(steps('applicationGatewayConfig').autoScaleMaxCapacity, 10))]",
-            "availabilityZones": "[steps('applicationGatewayConfig').zones]",
+            "availabilityZones": "[if(equals(steps('applicationGatewayConfig').zones, ''), steps('applicationGatewayConfig').zones, string(steps('applicationGatewayConfig').zones))]",
             "installMSI": "[steps('InstallationOptionsConfig').installMSI]",
             "updateMSI": "[steps('InstallationOptionsConfig').updateMSI]",
             "uninstallMSI": "[steps('InstallationOptionsConfig').uninstallMSI]",
