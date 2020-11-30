@@ -237,18 +237,14 @@
                         "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
                     },
                     {
-                        "name": "keyVaultSecretName",
-                        "type": "Microsoft.Common.PasswordBox",
-                        "label": {
-                            "password" : "Key Vault Secret Name",
-                            "confirmPassword": "Confirm Secret Name"
-                        },
-                        "toolTip": "Name of the Secret stored in Key Vault",
-                        "options": {
-                            "hideConfirmation": false
-                        },
+                        "name": "rgName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Resource Group Name",
+                        "toolTip": "Name of the Resource Group containg the Vault",
                         "constraints": {
-                            "required": true
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
                         },
                         "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
                     },
@@ -782,13 +778,17 @@
                                      "type": "string",
                                      "value":"[steps('SecurityConfig').certificatePassword]"
                                     },
+            "keyVaultName": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
+                                     "type": "string",
+                                     "value": "[steps('SecurityConfig').keyVaultName]"
+                                    },
             "keyVaultCertificateName": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
                                      "value": "[steps('SecurityConfig').keyVaultCertificateName]"
                                     },
-            "keyVaultSecretName": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
+            "resourceGroupName": { "condition": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]",
                                      "type": "string",
-                                     "value": "[steps('SecurityConfig').keyVaultSecretName]"
+                                     "value": "[steps('SecurityConfig').rgName]"
                               },
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
             "adminPassword": "[steps('SecurityConfig').adminPassword]",

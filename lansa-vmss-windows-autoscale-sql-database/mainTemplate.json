@@ -182,21 +182,21 @@
       "keyVaultName": {
          "type": "string",
          "metadata": {
-            "description": "The name of the keyvault that contains the secret."
+            "description": "The name of the Key Vault that contains the secret."
          }
       },
       "keyVaultCertificateName": {
          "type": "string",
          "defaultValue": "",
          "metadata": {
-            "description": "Base 64 encoded String representing the SSL certificate"
+            "description": "Name of Certificate stored in Key Vault representing the SSL certificate"
          }
       },
-      "keyVaultSecretName": {
-         "type": "securestring",
-         "defaultValue": "",
+      "rgName": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().name]",
          "metadata": {
-            "description": "SSL certificate password"
+            "description": "Name of Resource Group containg the Vault"
          }
       },
       "minimumInstanceCount": {
@@ -505,7 +505,9 @@
       "agFrontendPortName": "appGatewayFrontendPort",
       "agSslCertName": "appGatewaySslCert",
       "agBackendHttpSettingsName": "appGatewayBackendHttpSettings",
-      "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]"
+      "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]",
+      "refer": "[reer",
+      "secondRefer": "ence('dynamicSecret').outputs.kvCert.value]"
    },
    "resources": [
       {
@@ -536,19 +538,13 @@
                "parameters": {
                   "vaultCertificate": {
                      "type": "string"
-                  },
-                  "vaultSecret": {
-                     "type": "securestring"
                   }
                },
+               "resources": [],
                "outputs": {
                   "kvCert": {
                      "value": "[parameters('vaultCertificate')]",
                      "type": "string"
-                  },
-                  "kvSecret": {
-                     "value": "[parameters('vaultSecret')]",
-                     "type": "securestring"
                   }
                }
             },
@@ -556,17 +552,9 @@
                "vaultCertificate": {
                   "reference": {
                      "keyVault": {
-                        "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
+                        "id": "[resourceId(subscription().subscriptionId, parameters('rgName'), 'Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
                      },
-                     "certificateName": "[parameters('keyVaultCertificateName')]"
-                  }
-               },
-               "vaultSecret": {
-                  "reference": {
-                     "keyVault": {
-                        "id": "[resourceId(subscription().subscriptionId, resourceGroup().name, 'Microsoft.KeyVault/vaults', parameters('vaultName'))]"
-                     },
-                     "secretName": "[parameters('keyVaultSecretName')]"
+                     "secretName": "[parameters('keyVaultCertificateName')]"
                   }
                }
             }
@@ -1059,8 +1047,8 @@
                {
                   "name": "[variables('agSslCertName')]",
                   "properties": {
-                     "data": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), reference('dynamicSecret').outputs.kvCert.value, parameters('certificateBase64Encoded')]",
-                     "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), reference('dynamicSecret').outputs.kvSecret.value, parameters('certificatePassword')]"
+                     "data": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), reference('dynamicSecret').outputs.kvCert.value, parameters('certificateBase64Encoded'))]",
+                     "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), json('null'), parameters('certificatePassword'))]"
                   }
                }
             ],
