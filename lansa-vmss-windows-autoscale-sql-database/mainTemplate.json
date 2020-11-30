@@ -37,6 +37,7 @@
          "allowedValues": [
             "Marketplace",
             "Custom"
+
          ],
          "defaultValue": "Marketplace",
          "metadata": {
@@ -87,7 +88,7 @@
          "metadata": {
             "description": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended. Some identifiers use precisely 9 characters from this name and so it can be useful to use exactly 9. The template pads it out or truncates it as necessary to make it 9 characters long where required."
          },
-         "minLength": 3,
+         "minLength" : 3,
          "maxLength": 61
       },
       "applicationGatewaySkuTier": {
@@ -124,18 +125,68 @@
             "description": "Number of Application Gateway instances"
          }
       },
+      "agpublicIpNewOrExisting": {
+         "type": "string",
+         "defaultValue": "new",
+         "metadata": {
+           "description": "Determines whether or not a new public ip should be provisioned."
+         }
+       },
+       "agpublicIpName": {
+         "type": "string",
+         "defaultValue":"[toLower(concat(parameters('stackName'),'-agpip'))]",
+         "metadata": {
+           "description": "Name of the public ip address"
+         }
+       },
+       "agpublicIpDns": {
+         "type": "string",
+         "defaultValue": "[toLower(concat('ag',parameters('stackName')))]",
+         "metadata": {
+           "description": "DNS of the public ip address for the VM"
+         }
+       },
+       "agpublicIpResourceGroupName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
+       "agpublicIpAllocationMethod": {
+         "type": "string",
+         "defaultValue": "Dynamic",
+         "allowedValues": [
+           "Dynamic",
+           "Static"
+         ],
+         "metadata": {
+           "description": "Allocation method for the public ip address"
+         }
+       },
+       "agpublicIpSku": {
+         "type": "string",
+         "defaultValue": "Basic",
+         "allowedValues": [
+           "Basic",
+           "Standard"
+         ],
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
       "autoScaleMinCapacity": {
          "type": "int",
          "defaultValue": 0,
          "metadata": {
-            "description": "Lower bound on number of Application Gateway capacity"
+            "description": "Lower bound on Application Gateway capacity"
          }
       },
       "autoScaleMaxCapacity": {
          "type": "int",
          "defaultValue": 10,
          "metadata": {
-            "description": "Upper bound on number of Application Gateway capacity"
+            "description": "Upper bound on Application Gateway capacity"
          }
       },
       "enableAutoscaling": {
@@ -146,10 +197,8 @@
          }
       },
       "availabilityZones": {
-         "type": "array",
-         "defaultValue": [
-            ""
-         ],
+         "type": "string",
+         "defaultValue": "",
          "metadata": {
             "description": "Zone numbers e.g. 1,2,3."
          }
@@ -167,14 +216,12 @@
       },
       "certificateBase64Encoded": {
          "type": "string",
-         "defaultValue": "",
          "metadata": {
             "description": "Base 64 encoded String representing the SSL certificate"
          }
       },
       "certificatePassword": {
          "type": "securestring",
-         "defaultValue": "",
          "metadata": {
             "description": "SSL certificate password"
          }
@@ -218,15 +265,15 @@
          "maxValue": 600
       },
       "databaseNewOrExisting": {
-         "type": "string",
-         "defaultValue": "new",
-         "allowedValues": [
+        "type": "string",
+        "defaultValue": "new",
+        "allowedValues": [
             "new",
             "existing"
          ],
-         "metadata": {
-            "description": "Determines whether a new SQL database should be provisioned or to use an existing database. Parameters which are relevant to choosing 'new' are prefixed 'New DB'. Parameters which are relevant to choosing 'existing' are prefixed 'Existing DB'."
-         }
+        "metadata": {
+          "description": "Determines whether a new SQL database should be provisioned or to use an existing database. Parameters which are relevant to choosing 'new' are prefixed 'New DB'. Parameters which are relevant to choosing 'existing' are prefixed 'Existing DB'."
+        }
       },
       "databaseType": {
          "type": "string",
@@ -265,6 +312,7 @@
          "metadata": {
             "description": "The password of the admin user of the Azure SQL Database"
          }
+
       },
       "collation": {
          "type": "string",
@@ -404,17 +452,17 @@
    },
    "variables": {
       "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
-      "addAGName": "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))]",
-      "autoScaleConfig": {
+      "addAGName" : "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))]",
+      "autoScaleConfig" : {
          "minCapacity": "[parameters('autoScaleMinCapacity')]",
          "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
       },
+      "zonesArray": "[split(replace(replace(replace(parameters('availabilityZones'), '[', ''), ']', ''), '\"', ''), ',')]",
       "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
       "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "longNamingInfix": "[toLower(parameters('stackName'))]",
       "dblongNamingInfix": "[toLower(concat('db',parameters('stackName')))]",
-      "aglongNamingInfix": "[toLower(concat('ag',parameters('stackName')))]",
       "dbvmssName": "[toLower(substring(concat('db',parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "addressPrefix": "10.0.0.0/16",
       "subnetPrefix": "10.0.0.0/24",
@@ -467,6 +515,7 @@
             "version": {
                "V15 GA": {
                   "sku": "w12r2d-15-0"
+
                },
                "V14 SP2": {
                   "sku": "lansa-scalable-license-14-2"
@@ -487,15 +536,17 @@
          "id": "[parameters('imageId')]"
       },
       "imageReference": "[if(variables('isCustomImage'), variables('imageResourceId'), variables('osType'))]",
-      "imagePlan": {
+      "imagePlan" : {
          "name": "[variables('imageSKU')]",
          "product": "[variables('imageOfferName')]",
          "publisher": "[variables('imagePublisher')]"
       },
       "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
       "q": "'",
-      "agPublicIPAddressName": "[concat(variables('namingInfix'), '-agpip')]",
-      "agPublicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName'))]",
+      "isAgPublicIPNew": "[equals(parameters('agpublicIpNewOrExisting'), 'new')]",
+      "agPublicIPAddressName": "[parameters('agpublicIpName')]",
+      "agPublicIPAddressID": "[if(variables('isAgPublicIPNew'), resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName')), resourceId(parameters('agpublicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName')))]",
+      "agResourceDependsOn": "[if(variables('isAgPublicIPNew'), resourceId('Microsoft.Network/publicIPAddresses', variables('agPublicIPAddressName')), json('null'))]",
       "agSubnetPrefix": "10.0.1.0/24",
       "agSubnetName": "[concat(variables('namingInfix'), '-agsubnet')]",
       "agSubnetID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('agsubnetName'))]",
@@ -505,23 +556,21 @@
       "agFrontendPortName": "appGatewayFrontendPort",
       "agSslCertName": "appGatewaySslCert",
       "agBackendHttpSettingsName": "appGatewayBackendHttpSettings",
-      "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]",
-      "refer": "[reer",
-      "secondRefer": "ence('dynamicSecret').outputs.kvCert.value]"
+      "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]"
    },
    "resources": [
       {
-         "apiVersion": "2020-06-01",
-         "name": "pid-5990c833-d17a-5616-8ab3-144d90fea6e9",
-         "type": "Microsoft.Resources/deployments",
-         "properties": {
+        "apiVersion": "2020-06-01",
+        "name": "pid-5990c833-d17a-5616-8ab3-144d90fea6e9",
+        "type": "Microsoft.Resources/deployments",
+        "properties": {
             "mode": "Incremental",
             "template": {
-               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-               "contentVersion": "1.0.0.0",
-               "resources": []
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "resources": []
             }
-         }
+        }
       },
       {
          "type": "Microsoft.Resources/deployments",
@@ -883,13 +932,13 @@
                                  "name": "[variables('ipConfigName')]",
                                  "properties": {
                                     "subnet": {
-                                       "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
-                                    },
-                                    "loadBalancerBackendAddressPools": [
-                                       {
-                                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('bePoolName'))]"
-                                       }
-                                    ],
+                                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+                                     },
+                                     "loadBalancerBackendAddressPools": [
+                                        {
+                                           "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('bePoolName'))]"
+                                        }
+                                     ],
                                     "loadBalancerInboundNatPools": [
                                        {
                                           "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', variables('loadBalancerName'), variables('natPoolName'))]"
@@ -1014,17 +1063,18 @@
          }
       },
       {
+         "condition": "[variables('isAgPublicIPNew')]",
          "apiVersion": "2019-08-01",
          "type": "Microsoft.Network/publicIPAddresses",
          "name": "[variables('agPublicIPAddressName')]",
          "location": "[parameters('location')]",
          "sku": {
-            "name": "[if(variables('addAGName'), 'Basic', 'Standard')]"
+            "name": "[parameters('agpublicIpSku')]"
          },
          "properties": {
-            "publicIPAllocationMethod": "[if(variables('addAGName'), 'Dynamic', 'Static')]",
+            "publicIPAllocationMethod": "[parameters('agpublicIpAllocationMethod')]",
             "dnsSettings": {
-               "domainNameLabel": "[variables('aglongNamingInfix')]"
+               "domainNameLabel": "[parameters('agpublicIpDns')]"
             }
          }
       },
@@ -1035,13 +1085,13 @@
          "location": "[parameters('location')]",
          "dependsOn": [
             "[ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-            "[ResourceId('Microsoft.Network/publicIPAddresses', variables('agPublicIPAddressName'))]"
+            "[coalesce(variables('agResourceDependsOn'), ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')))]"
          ],
          "properties": {
             "sku": {
-               "tier": "[parameters('applicationGatewaySkuTier')]",
-               "name": "[if(variables('addAGName'), parameters('applicationGatewaySkuName'), parameters('applicationGatewaySkuTier'))]",
-               "capacity": "[if(variables('addAGName'), parameters('applicationGatewayCapacity'), if(parameters('enableAutoscaling'), json('null'), parameters('applicationGatewayCapacity')))]"
+                "tier": "[parameters('applicationGatewaySkuTier')]",
+                "name": "[if(variables('addAGName'), parameters('applicationGatewaySkuName'), parameters('applicationGatewaySkuTier'))]",
+                "capacity": "[if(variables('addAGName'), parameters('applicationGatewayCapacity'), if(parameters('enableAutoscaling'), json('null'), parameters('applicationGatewayCapacity')))]"
             },
             "sslCertificates": [
                {
@@ -1102,6 +1152,7 @@
                   "properties": {
                      "FrontendIPConfiguration": {
                         "Id": "[resourceId('Microsoft.Network/applicationgateways/frontendIPConfigurations',variables('agName'),variables('agFrontendIPName'))]"
+
                      },
                      "FrontendPort": {
                         "Id": "[resourceId('Microsoft.Network/applicationgateways/frontendPorts',variables('agName'),variables('agFrontendPortName'))]"
@@ -1132,7 +1183,7 @@
             ],
             "autoscaleConfiguration": "[if(parameters('enableAutoscaling'), variables('autoScaleConfig'), json('null'))]"
          },
-         "zones": "[if(and(equals(parameters('enableAutoscaling'), true()), greater(length(parameters('availabilityZones')), 0)), if(contains(parameters('availabilityZones'),''), json('null'), parameters('availabilityZones')), json('null'))]"
+         "zones": "[if(and(equals(parameters('enableAutoscaling'), true()), greater(length(variables('zonesArray')), 0)), if(contains(variables('zonesArray'),''), json('null'), variables('zonesArray')), json('null'))]"
       },
       {
          "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
@@ -1200,7 +1251,7 @@
       },
       "lbFqdn": {
          "type": "string",
-         "value": "[concat('https://', reference(variables('agPublicIPAddressName')).dnsSettings.fqdn)]"
+         "value": "[if(variables('isAgPublicIPNew'), concat('https://', reference(variables('agPublicIPAddressID')).dnsSettings.fqdn), concat('https://', reference(variables('agPublicIPAddressID'), '2018-07-01').dnsSettings.fqdn))]"
       },
       "dbrdpAddress": {
          "type": "string",
