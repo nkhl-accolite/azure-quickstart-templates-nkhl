@@ -168,6 +168,7 @@
                         "name": "keyVaultEnabledForTemplateDeployment",
                         "type": "Microsoft.Common.DropDown",
                         "label": "Key Vault Enabled For Template Deployment",
+                        "defaultValue": "false",
                         "toolTip": "Determines whether to use Key Vault Certificate as SSL Certificate or not.",
                         "constraints": {
                             "required": true,
