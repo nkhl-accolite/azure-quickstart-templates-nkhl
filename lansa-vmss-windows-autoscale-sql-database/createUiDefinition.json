@@ -169,7 +169,6 @@
                         "type": "Microsoft.Common.DropDown",
                         "label": "Key Vault Enabled For Template Deployment",
                         "toolTip": "Determines whether to use Key Vault Certificate as SSL Certificate or not.",
-                        "defaultValue": "true",
                         "constraints": {
                             "required": true,
                             "allowedValues":[
@@ -893,7 +892,7 @@
             "certificatePassword": "[steps('SecurityConfig').certificatePassword]",
             "keyVaultName": "[steps('SecurityConfig').keyVaultName]",
             "keyVaultCertificateName": "[steps('SecurityConfig').keyVaultCertificateName]",
-            "resourceGroupName": "[steps('SecurityConfig').rgName]",
+            "rgName": "[steps('SecurityConfig').rgName]",
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
             "webUsername": "[steps('SecurityConfig').webUsername]",

@@ -205,7 +205,6 @@
       },
       "keyVaultEnabledForTemplateDeployment": {
          "type": "string",
-         "defaultValue": "true",
          "allowedValues": [
             "true",
             "false"
@@ -216,18 +215,21 @@
       },
       "certificateBase64Encoded": {
          "type": "string",
+         "defaultValue": "",
          "metadata": {
             "description": "Base 64 encoded String representing the SSL certificate"
          }
       },
       "certificatePassword": {
          "type": "securestring",
+         "defaultValue": "",
          "metadata": {
             "description": "SSL certificate password"
          }
       },
       "keyVaultName": {
          "type": "string",
+         "defaultValue": "",
          "metadata": {
             "description": "The name of the Key Vault that contains the secret."
          }
@@ -573,6 +575,7 @@
         }
       },
       {
+         "condition": "[equals(parameters('keyVaultEnabledForTemplateDeployment'), 'true')]",
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "2018-05-01",
          "name": "dynamicSecret",
