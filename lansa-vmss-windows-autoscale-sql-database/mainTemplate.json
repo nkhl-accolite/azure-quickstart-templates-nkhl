@@ -578,7 +578,7 @@
       {
          "condition": "[equals(parameters('keyVaultEnabledForTemplateDeployment'), 'true')]",
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "2019-04-01",
+         "apiVersion": "2020-06-01",
          "name": "dynamicSecret",
          "properties": {
             "mode": "Incremental",
@@ -605,7 +605,7 @@
                "vaultCertificate": {
                   "reference": {
                      "keyVault": {
-                        "id": "[resourceId(subscription().subscriptionId, parameters('rgName'), 'Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+                        "id": "[resourceId(parameters('rgName'), 'Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
                      },
                      "secretName": "[parameters('keyVaultCertificateName')]"
                   }
