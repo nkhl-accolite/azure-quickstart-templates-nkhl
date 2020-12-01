@@ -891,6 +891,7 @@
             "webServerMaxConnect": "[basics('webServerMaxConnect')]",
             "certificateBase64Encoded": "[steps('SecurityConfig').certificateBase64Encoded]",
             "certificatePassword": "[steps('SecurityConfig').certificatePassword]",
+            "keyVaultEnabledForTemplateDeployment": "[steps('SecurityConfig').keyVaultEnabledForTemplateDeployment]",
             "keyVaultName": "[steps('SecurityConfig').keyVaultName]",
             "keyVaultCertificateName": "[steps('SecurityConfig').keyVaultCertificateName]",
             "rgName": "[steps('SecurityConfig').rgName]",

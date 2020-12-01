@@ -205,6 +205,7 @@
       },
       "keyVaultEnabledForTemplateDeployment": {
          "type": "string",
+         "defaultValue": "false",
          "allowedValues": [
             "true",
             "false"
