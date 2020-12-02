@@ -353,7 +353,6 @@
       },
       "dbMinCapacity": {
          "type": "string",
-         "defaultValue": "0.5",
          "metadata": {
             "description": "Minimal capacity that database will always have allocated, if not paused"
          }
@@ -1202,7 +1201,7 @@
             {
                "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
                "type": "firewallRules",
-               "apiVersion": "2015-05-01-preview",
+               "apiVersion": "2019-06-01-preview",
                "dependsOn": [
                   "[variables('sqlserverName')]"
                ],
