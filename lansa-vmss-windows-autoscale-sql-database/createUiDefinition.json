@@ -351,6 +351,10 @@
                             "required": true,
                             "allowedValues":[
                                 {
+                                    "label": "Serverless",
+                                    "value": "Serverless"
+                                },
+                                {
                                     "label": "Basic",
                                     "value": "Basic"
                                 },
@@ -468,6 +472,882 @@
                             ]
                         },
                         "visible": "[and(equals(steps('DatabaseConfig').edition, 'Premium'), equals(steps('DatabaseConfig').databaseNewOrExisting, 'new'))]"
+                    },
+                    {
+                        "name": "serverlessDbCapacity",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Max vCores",
+                        "toolTip": "The maximum number of cores available to use in the database. [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). [Learn more about how Gen5 serverless parameters effect the resources available to the database server](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "1",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "1",
+                                    "value": 1
+                                },
+                                {
+                                    "label": "2",
+                                    "value": 2
+                                },
+                                {
+                                    "label": "4",
+                                    "value": 4
+                                },
+                                {
+                                    "label": "6",
+                                    "value": 6
+                                },
+                                {
+                                    "label": "8",
+                                    "value": 8
+                                },
+                                {
+                                    "label": "10",
+                                    "value": 10
+                                },
+                                {
+                                    "label": "12",
+                                    "value": 12
+                                },
+                                {
+                                    "label": "14",
+                                    "value": 14
+                                },
+                                {
+                                    "label": "16",
+                                    "value": 16
+                                },
+                                {
+                                    "label": "18",
+                                    "value": 18
+                                },
+                                {
+                                    "label": "20",
+                                    "value": 20
+                                },
+                                {
+                                    "label": "24",
+                                    "value": 24
+                                },
+                                {
+                                    "label": "32",
+                                    "value": 32
+                                },
+                                {
+                                    "label": "40",
+                                    "value": 40
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').databaseNewOrExisting, 'new'))]"
+                    },
+                    {
+                        "name": "dbMinCapacity1",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "0.5",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "0.5",
+                                    "value": "0.5"
+                                },
+                                {
+                                    "label": "0.75",
+                                    "value": "0.75"
+                                },
+                                {
+                                    "label": "1.0",
+                                    "value": "1.0"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 1))]"
+                    },
+                    {
+                        "name": "dbMinCapacity2",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "0.5",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "0.5",
+                                    "value": "0.5"
+                                },
+                                {
+                                    "label": "0.75",
+                                    "value": "0.75"
+                                },
+                                {
+                                    "label": "1.0",
+                                    "value": "1.0"
+                                },
+                                {
+                                    "label": "1.25",
+                                    "value": "1.25"
+                                },
+                                {
+                                    "label": "1.5",
+                                    "value": "1.5"
+                                },
+                                {
+                                    "label": "1.75",
+                                    "value": "1.75"
+                                },
+                                {
+                                    "label": "2",
+                                    "value": "2"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 2))]"
+                    },
+                    {
+                        "name": "dbMinCapacity4",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "0.5",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "0.5",
+                                    "value": "0.5"
+                                },
+                                {
+                                    "label": "0.75",
+                                    "value": "0.75"
+                                },
+                                {
+                                    "label": "1.0",
+                                    "value": "1.0"
+                                },
+                                {
+                                    "label": "1.25",
+                                    "value": "1.25"
+                                },
+                                {
+                                    "label": "1.5",
+                                    "value": "1.5"
+                                },
+                                {
+                                    "label": "1.75",
+                                    "value": "1.75"
+                                },
+                                {
+                                    "label": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "2.25",
+                                    "value": "2.25"
+                                },
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 4))]"
+                    },
+                    {
+                        "name": "dbMinCapacity6",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "0.75",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "0.75",
+                                    "value": "0.75"
+                                },
+                                {
+                                    "label": "1.0",
+                                    "value": "1.0"
+                                },
+                                {
+                                    "label": "1.25",
+                                    "value": "1.25"
+                                },
+                                {
+                                    "label": "1.5",
+                                    "value": "1.5"
+                                },
+                                {
+                                    "label": "1.75",
+                                    "value": "1.75"
+                                },
+                                {
+                                    "label": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "2.25",
+                                    "value": "2.25"
+                                },
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 6))]"
+                    },
+                    {
+                        "name": "dbMinCapacity8",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "1.0",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "1.0",
+                                    "value": "1.0"
+                                },
+                                {
+                                    "label": "1.25",
+                                    "value": "1.25"
+                                },
+                                {
+                                    "label": "1.5",
+                                    "value": "1.5"
+                                },
+                                {
+                                    "label": "1.75",
+                                    "value": "1.75"
+                                },
+                                {
+                                    "label": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "2.25",
+                                    "value": "2.25"
+                                },
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 8))]"
+                    },
+                    {
+                        "name": "dbMinCapacity10",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "1.25",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "1.25",
+                                    "value": "1.25"
+                                },
+                                {
+                                    "label": "1.5",
+                                    "value": "1.5"
+                                },
+                                {
+                                    "label": "1.75",
+                                    "value": "1.75"
+                                },
+                                {
+                                    "label": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "2.25",
+                                    "value": "2.25"
+                                },
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 10))]"
+                    },
+                    {
+                        "name": "dbMinCapacity12",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "1.5",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "1.5",
+                                    "value": "1.5"
+                                },
+                                {
+                                    "label": "1.75",
+                                    "value": "1.75"
+                                },
+                                {
+                                    "label": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "2.25",
+                                    "value": "2.25"
+                                },
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "12",
+                                    "value": "12"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 12))]"
+                    },
+                    {
+                        "name": "dbMinCapacity14",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "1.75",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "1.75",
+                                    "value": "1.75"
+                                },
+                                {
+                                    "label": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "2.25",
+                                    "value": "2.25"
+                                },
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "12",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "14",
+                                    "value": "14"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 14))]"
+                    },
+                    {
+                        "name": "dbMinCapacity16",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "2",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "2",
+                                    "value": "2"
+                                },
+                                {
+                                    "label": "2.25",
+                                    "value": "2.25"
+                                },
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "12",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "14",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "16",
+                                    "value": "16"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 16))]"
+                    },
+                    {
+                        "name": "dbMinCapacity18",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "2.25",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "2.25",
+                                    "value": "2.25"
+                                },
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "12",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "14",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "16",
+                                    "value": "16"
+                                },
+                                {
+                                    "label": "18",
+                                    "value": "18"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 18))]"
+                    },
+                    {
+                        "name": "dbMinCapacity20",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "2.5",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "2.5",
+                                    "value": "2.5"
+                                },
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "12",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "14",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "16",
+                                    "value": "16"
+                                },
+                                {
+                                    "label": "18",
+                                    "value": "18"
+                                },
+                                {
+                                    "label": "20",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 20))]"
+                    },
+                    {
+                        "name": "dbMinCapacity24",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "3",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "3",
+                                    "value": "3"
+                                },
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "12",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "14",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "16",
+                                    "value": "16"
+                                },
+                                {
+                                    "label": "18",
+                                    "value": "18"
+                                },
+                                {
+                                    "label": "20",
+                                    "value": "20"
+                                },
+                                {
+                                    "label": "24",
+                                    "value": "24"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 24))]"
+                    },
+                    {
+                        "name": "dbMinCapacity32",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "4",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "4",
+                                    "value": "4"
+                                },
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "12",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "14",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "16",
+                                    "value": "16"
+                                },
+                                {
+                                    "label": "18",
+                                    "value": "18"
+                                },
+                                {
+                                    "label": "20",
+                                    "value": "20"
+                                },
+                                {
+                                    "label": "24",
+                                    "value": "24"
+                                },
+                                {
+                                    "label": "32",
+                                    "value": "32"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 32))]"
+                    },
+                    {
+                        "name": "dbMinCapacity40",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Min vCores",
+                        "toolTip": "The minimum number of cores to use in the database. These cores will be the minimum charge except when the database server is paused.  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview). It must be less than or equal to Max vCores. Its minimum varies according to the Max vCores selected  [Learn more about the min-max vCore relationship in Gen5 servers](https://docs.microsoft.com/en-us/azure/azure-sql/database/resource-limits-vcore-single-databases)",
+                        "defaultValue": "5",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "5",
+                                    "value": "5"
+                                },
+                                {
+                                    "label": "6",
+                                    "value": "6"
+                                },
+                                {
+                                    "label": "8",
+                                    "value": "8"
+                                },
+                                {
+                                    "label": "10",
+                                    "value": "10"
+                                },
+                                {
+                                    "label": "12",
+                                    "value": "12"
+                                },
+                                {
+                                    "label": "14",
+                                    "value": "14"
+                                },
+                                {
+                                    "label": "16",
+                                    "value": "16"
+                                },
+                                {
+                                    "label": "18",
+                                    "value": "18"
+                                },
+                                {
+                                    "label": "20",
+                                    "value": "20"
+                                },
+                                {
+                                    "label": "24",
+                                    "value": "24"
+                                },
+                                {
+                                    "label": "32",
+                                    "value": "32"
+                                },
+                                {
+                                    "label": "40",
+                                    "value": "40"
+                                }
+                            ]
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').serverlessDbCapacity, 40))]"
+                    },
+                    {
+                        "name": "autoPauseDelay",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Auto Pause Delay",
+                        "toolTip": "Number of minutes to wait until pausing the database. Minimum 60. Maximum 10, 080 ( 7  days). Specify -1 to disable the delay  [Learn more about costing serverless compute](https://docs.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview)",
+                        "defaultValue": "60",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(-1|[6-9][0-9]|[1-9][0-9][0-9]|[1-9][0-9][0-9][0-9]|100[0-7][0-9]|10080)$",
+                            "validationMessage": "The value must be in range 60 - 10080 (7 days). Specify -1 to disable auto pause."
+                        },
+                        "visible": "[and(equals(steps('DatabaseConfig').edition, 'Serverless'), equals(steps('DatabaseConfig').databaseNewOrExisting, 'new'))]"
                     },
                     {
                         "name": "maxSizeBytes",
@@ -844,6 +1724,9 @@
             "collation": "[steps('DatabaseConfig').collation]",
             "edition": "[steps('DatabaseConfig').edition]",
             "requestedServiceObjectiveName": "[coalesce(steps('DatabaseConfig').requestedServiceObjectiveNameBasic, steps('DatabaseConfig').requestedServiceObjectiveNameStandard, steps('DatabaseConfig').requestedServiceObjectiveNamePremium)]",
+            "serverlessDbCapacity": "[steps('DatabaseConfig').serverlessDbCapacity]",
+            "dbMinCapacity": "[coalesce(steps('DatabaseConfig').dbMinCapacity1, steps('DatabaseConfig').dbMinCapacity2, steps('DatabaseConfig').dbMinCapacity4, steps('DatabaseConfig').dbMinCapacity6, steps('DatabaseConfig').dbMinCapacity8, steps('DatabaseConfig').dbMinCapacity10, steps('DatabaseConfig').dbMinCapacity12, steps('DatabaseConfig').dbMinCapacity14, steps('DatabaseConfig').dbMinCapacity16, steps('DatabaseConfig').dbMinCapacity18, steps('DatabaseConfig').dbMinCapacity20, steps('DatabaseConfig').dbMinCapacity24, steps('DatabaseConfig').dbMinCapacity32, steps('DatabaseConfig').dbMinCapacity40)]",
+            "autoPauseDelay": "[int(coalesce(steps('DatabaseConfig').autoPauseDelay, 60))]",
             "maxSizeBytes": "[steps('DatabaseConfig').maxSizeBytes]",
             "databaseLogin": "[steps('DatabaseConfig').databaseLogin]",
             "databaseLoginPassword": "[steps('DatabaseConfig').databaseLoginPassword]",

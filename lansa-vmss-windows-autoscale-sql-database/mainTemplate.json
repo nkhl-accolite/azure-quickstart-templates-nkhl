@@ -294,6 +294,7 @@
          "type": "string",
          "defaultValue": "Standard",
          "allowedValues": [
+            "Serverless",
             "Basic",
             "Standard",
             "Premium"
@@ -325,6 +326,43 @@
          ],
          "metadata": {
             "description": "New DB. Describes the performance level for Edition"
+         }
+      },
+      "serverlessDbCapacity": {
+         "type": "int",
+         "defaultValue": 1,
+         "allowedValues": [
+            1,
+            2,
+            4,
+            6,
+            8,
+            10,
+            12,
+            14,
+            16,
+            18,
+            20,
+            24,
+            32,
+            40
+         ],
+         "metadata": {
+            "description": "Capacity of the particular SKU"
+         }
+      },
+      "dbMinCapacity": {
+         "type": "string",
+         "defaultValue": "0.5",
+         "metadata": {
+            "description": "Minimal capacity that database will always have allocated, if not paused"
+         }
+      },
+      "autoPauseDelay": {
+         "type": "int",
+         "defaultValue": 60,
+         "metadata": {
+            "description": "Time in minutes after which database is automatically paused"
          }
       },
       "maxSizeBytes": {
@@ -427,6 +465,8 @@
          "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
       },
       "zonesArray": "[split(replace(replace(replace(parameters('availabilityZones'), '[', ''), ']', ''), '\"', ''), ',')]",
+      "isDatabaseServerless": "[equals(parameters('edition'), 'Serverless')]",
+      "dbSkuName": "[if(variables('isDatabaseServerless'), 'GP_S_Gen5', parameters('requestedServiceObjectiveName'))]",
       "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
       "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
@@ -1129,7 +1169,7 @@
          "tags": {
             "displayName": "SqlServer"
          },
-         "apiVersion": "2020-02-02-preview",
+         "apiVersion": "2019-06-01-preview",
          "properties": {
             "administratorLogin": "[parameters('databaseLogin')]",
             "administratorLoginPassword": "[parameters('databaseLoginPassword')]",
@@ -1144,21 +1184,25 @@
                "tags": {
                   "displayName": "Database"
                },
-               "apiVersion": "2020-02-02-preview",
+               "sku": {
+                  "name": "[variables('dbSkuName')]",
+                  "capacity": "[if(variables('isDatabaseServerless'), parameters('serverlessDbCapacity'), json('null'))]"
+               },
+               "apiVersion": "2020-08-01-preview",
                "dependsOn": [
                   "[variables('sqlserverName')]"
                ],
                "properties": {
-                  "edition": "[parameters('edition')]",
                   "collation": "[parameters('collation')]",
                   "maxSizeBytes": "[parameters('maxSizeBytes')]",
-                  "requestedServiceObjectiveName": "[parameters('requestedServiceObjectiveName')]"
+                  "minCapacity": "[if(variables('isDatabaseServerless'), float(parameters('dbMinCapacity')), json('null'))]",
+                  "autoPauseDelay": "[if(variables('isDatabaseServerless'), parameters('autoPauseDelay'), json('null'))]"
                }
             },
             {
                "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
                "type": "firewallRules",
-               "apiVersion": "2020-02-02-preview",
+               "apiVersion": "2015-05-01-preview",
                "dependsOn": [
                   "[variables('sqlserverName')]"
                ],
