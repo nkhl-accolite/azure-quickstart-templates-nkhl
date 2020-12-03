@@ -355,7 +355,7 @@
          "type": "string",
          "defaultValue": "",
          "metadata": {
-            "description": "Minimal capacity that database will always have allocated, if not paused"
+            "description": "The minimum capacity that the database will always have allocated, if not paused"
          }
       },
       "autoPauseDelay": {
