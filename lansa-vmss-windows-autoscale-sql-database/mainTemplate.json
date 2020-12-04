@@ -1283,16 +1283,6 @@
          "condition": "[variables('isCustomImage')]",
          "value": "[parameters('imageId')]",
          "type": "string"
-      },
-      "kvcertName": {
-        "condition": "[equals(parameters('keyVaultEnabled'), 'true')]",
-        "value": "[reference('dynamicSecret').outputs.kvCert.value]",
-        "type": "string"
-      },
-      "existingcertName": {
-        "condition": "[equals(parameters('keyVaultEnabled'), 'false')]",
-        "value": "[parameters('certificateBase64Encoded')]",
-        "type": "string"
       }
    }
 }
