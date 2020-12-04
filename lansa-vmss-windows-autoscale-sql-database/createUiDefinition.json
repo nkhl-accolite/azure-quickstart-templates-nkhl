@@ -165,6 +165,26 @@
                 "bladeTitle": "Security",
                 "elements": [
                     {
+                        "name": "keyVaultEnabled",
+                        "type": "Microsoft.Common.DropDown",
+                        "label": "Key Vault Enabled",
+                        "defaultValue": "false",
+                        "toolTip": "Set to true to use a Certificate created in Key Vault. Set to false to explicitly provide the certificate string",
+                        "constraints": {
+                            "required": true,
+                            "allowedValues":[
+                                {
+                                    "label": "true",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "false",
+                                    "value": "false"
+                                }
+                            ]
+                        }
+                    },
+                    {
                         "name": "certificateBase64Encoded",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Certificate Base64Encoded",
@@ -173,7 +193,8 @@
                             "required": true,
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
-                        }
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'false')]"
                     },
                     {
                         "name": "certificatePassword",
@@ -188,7 +209,44 @@
                         },
                         "constraints": {
                             "required": true
-                        }
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'false')]"
+                    },
+                    {
+                        "name": "keyVaultName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Key Vault Name",
+                        "toolTip": "Name of the Key Vault which contains the Certificate and Secret",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'true')]"
+                    },
+                    {
+                        "name": "keyVaultCertificateName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Key Vault Certificate Name",
+                        "toolTip": "Name of the Certificate stored in Key Vault",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'true')]"
+                    },
+                    {
+                        "name": "keyVaultRGName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Resource Group Name",
+                        "toolTip": "Name of the Resource Group which contains the Key Vault",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'true')]"
                     },
                     {
                         "name": "adminUsername",
@@ -1713,6 +1771,10 @@
             "webServerMaxConnect": "[basics('webServerMaxConnect')]",
             "certificateBase64Encoded": "[steps('SecurityConfig').certificateBase64Encoded]",
             "certificatePassword": "[steps('SecurityConfig').certificatePassword]",
+            "keyVaultEnabled": "[steps('SecurityConfig').keyVaultEnabled]",
+            "keyVaultName": "[steps('SecurityConfig').keyVaultName]",
+            "keyVaultCertificateName": "[steps('SecurityConfig').keyVaultCertificateName]",
+            "keyVaultRGName": "[steps('SecurityConfig').keyVaultRGName]",
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
             "webUsername": "[steps('SecurityConfig').webUsername]",

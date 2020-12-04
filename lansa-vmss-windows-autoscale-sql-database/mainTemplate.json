@@ -203,16 +203,50 @@
             "description": "Zone numbers e.g. 1,2,3."
          }
       },
+      "keyVaultEnabled": {
+         "type": "string",
+         "defaultValue": "false",
+         "allowedValues": [
+            "true",
+            "false"
+         ],
+         "metadata": {
+            "description": "Set to true to use a Certificate created in Key Vault. Set to false to explicitly provide the certificate string"
+         }
+      },
       "certificateBase64Encoded": {
          "type": "string",
+         "defaultValue": "",
          "metadata": {
             "description": "Base 64 encoded String representing the SSL certificate"
          }
       },
       "certificatePassword": {
          "type": "securestring",
+         "defaultValue": "",
          "metadata": {
             "description": "SSL certificate password"
+         }
+      },
+      "keyVaultName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Name of the Key Vault which contains the Certificate and Secret"
+         }
+      },
+      "keyVaultCertificateName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Name of the Certificate stored in Key Vault"
+         }
+      },
+      "keyVaultRGName": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().name]",
+         "metadata": {
+            "description": "Name of the Resource Group which contains the Key Vault"
          }
       },
       "minimumInstanceCount": {
@@ -575,11 +609,49 @@
         "properties": {
             "mode": "Incremental",
             "template": {
-                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                 "contentVersion": "1.0.0.0",
                 "resources": []
             }
         }
+      },
+      {
+         "condition": "[equals(parameters('keyVaultEnabled'), 'true')]",
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "2020-06-01",
+         "name": "dynamicSecret",
+         "properties": {
+            "mode": "Incremental",
+            "expressionEvaluationOptions": {
+               "scope": "inner"
+            },
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "parameters": {
+                  "vaultCertificate": {
+                     "type": "string"
+                  }
+               },
+               "resources": [],
+               "outputs": {
+                  "kvCert": {
+                     "value": "[parameters('vaultCertificate')]",
+                     "type": "string"
+                  }
+               }
+            },
+            "parameters": {
+               "vaultCertificate": {
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(parameters('keyVaultRGName'), 'Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultCertificateName')]"
+                  }
+               }
+            }
+         }
       },
       {
          "type": "Microsoft.Network/virtualNetworks",
@@ -1069,8 +1141,8 @@
                {
                   "name": "[variables('agSslCertName')]",
                   "properties": {
-                     "data": "[parameters('certificateBase64Encoded')]",
-                     "password": "[parameters('certificatePassword')]"
+                     "data": "[if(equals(parameters('keyVaultEnabled'),'true'), reference('dynamicSecret').outputs.kvCert.value, parameters('certificateBase64Encoded'))]",
+                     "password": "[if(equals(parameters('keyVaultEnabled'),'true'), json('null'), parameters('certificatePassword'))]"
                   }
                }
             ],
