@@ -203,7 +203,7 @@
             "description": "Zone numbers e.g. 1,2,3."
          }
       },
-      "keyVaultEnabledForTemplateDeployment": {
+      "keyVaultEnabled": {
          "type": "string",
          "defaultValue": "false",
          "allowedValues": [
@@ -211,7 +211,7 @@
             "false"
          ],
          "metadata": {
-            "description": "Determines whether to use Key Vault Certificate as SSL Certificate or not."
+            "description": "Set to true to use a Certificate created in Key Vault. Set to false to explicitly provide the certificate string"
          }
       },
       "certificateBase64Encoded": {
@@ -232,21 +232,21 @@
          "type": "string",
          "defaultValue": "",
          "metadata": {
-            "description": "Name of the Key Vault that contains the secret."
+            "description": "Name of the Key Vault which contains the Certificate and Secret"
          }
       },
       "keyVaultCertificateName": {
          "type": "string",
          "defaultValue": "",
          "metadata": {
-            "description": "Name of Certificate stored in Key Vault representing the SSL certificate"
+            "description": "Name of the Certificate stored in Key Vault"
          }
       },
-      "rgName": {
+      "keyVaultRGName": {
          "type": "string",
          "defaultValue": "[resourceGroup().name]",
          "metadata": {
-            "description": "Name of Resource Group containg the Vault"
+            "description": "Name of the Resource Group which contains the Key Vault"
          }
       },
       "minimumInstanceCount": {
@@ -576,7 +576,7 @@
         }
       },
       {
-         "condition": "[equals(parameters('keyVaultEnabledForTemplateDeployment'), 'true')]",
+         "condition": "[equals(parameters('keyVaultEnabled'), 'true')]",
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "2020-06-01",
          "name": "dynamicSecret",
@@ -605,7 +605,7 @@
                "vaultCertificate": {
                   "reference": {
                      "keyVault": {
-                        "id": "[resourceId(parameters('rgName'), 'Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+                        "id": "[resourceId(parameters('keyVaultRGName'), 'Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
                      },
                      "secretName": "[parameters('keyVaultCertificateName')]"
                   }
@@ -1101,8 +1101,8 @@
                {
                   "name": "[variables('agSslCertName')]",
                   "properties": {
-                     "data": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), reference('dynamicSecret').outputs.kvCert.value, parameters('certificateBase64Encoded'))]",
-                     "password": "[if(equals(parameters('keyVaultEnabledForTemplateDeployment'),'true'), json('null'), parameters('certificatePassword'))]"
+                     "data": "[if(equals(parameters('keyVaultEnabled'),'true'), reference('dynamicSecret').outputs.kvCert.value, parameters('certificateBase64Encoded'))]",
+                     "password": "[if(equals(parameters('keyVaultEnabled'),'true'), json('null'), parameters('certificatePassword'))]"
                   }
                }
             ],
@@ -1283,6 +1283,16 @@
          "condition": "[variables('isCustomImage')]",
          "value": "[parameters('imageId')]",
          "type": "string"
+      },
+      "kvcertName": {
+        "condition": "[equals(parameters('keyVaultEnabled'), 'true')]",
+        "value": "[reference('dynamicSecret').outputs.kvCert.value]",
+        "type": "string"
+      },
+      "existingcertName": {
+        "condition": "[equals(parameters('keyVaultEnabled'), 'false')]",
+        "value": "[parameters('certificateBase64Encoded')]",
+        "type": "string"
       }
    }
 }

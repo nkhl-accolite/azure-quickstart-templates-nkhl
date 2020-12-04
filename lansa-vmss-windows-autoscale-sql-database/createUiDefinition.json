@@ -165,11 +165,11 @@
                 "bladeTitle": "Security",
                 "elements": [
                     {
-                        "name": "keyVaultEnabledForTemplateDeployment",
+                        "name": "keyVaultEnabled",
                         "type": "Microsoft.Common.DropDown",
-                        "label": "Key Vault Enabled For Template Deployment",
+                        "label": "Key Vault Enabled",
                         "defaultValue": "false",
-                        "toolTip": "Determines whether to use Key Vault Certificate as SSL Certificate or not.",
+                        "toolTip": "Set to true to use a Certificate created in Key Vault. Set to false to explicitly provide the certificate string",
                         "constraints": {
                             "required": true,
                             "allowedValues":[
@@ -194,7 +194,7 @@
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
                         },
-                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]"
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'false')]"
                     },
                     {
                         "name": "certificatePassword",
@@ -210,43 +210,43 @@
                         "constraints": {
                             "required": true
                         },
-                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'false')]"
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'false')]"
                     },
                     {
                         "name": "keyVaultName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Key Vault Name",
-                        "toolTip": "The name of the keyvault that contains the Certificate and Secret.",
+                        "toolTip": "Name of the Key Vault which contains the Certificate and Secret",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
                         },
-                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'true')]"
                     },
                     {
                         "name": "keyVaultCertificateName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Key Vault Certificate Name",
-                        "toolTip": "Name of the certificate stored in Key Vault",
+                        "toolTip": "Name of the Certificate stored in Key Vault",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
                         },
-                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'true')]"
                     },
                     {
-                        "name": "rgName",
+                        "name": "keyVaultRGName",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Resource Group Name",
-                        "toolTip": "Name of the Resource Group containg the Vault",
+                        "toolTip": "Name of the Resource Group which contains the Key Vault",
                         "constraints": {
                             "required": true,
                             "regex": "^(?!\\s*$).+",
                             "validationMessage": "The value must not be empty."
                         },
-                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabledForTemplateDeployment, 'true')]"
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'true')]"
                     },
                     {
                         "name": "adminUsername",
@@ -891,10 +891,10 @@
             "webServerMaxConnect": "[basics('webServerMaxConnect')]",
             "certificateBase64Encoded": "[steps('SecurityConfig').certificateBase64Encoded]",
             "certificatePassword": "[steps('SecurityConfig').certificatePassword]",
-            "keyVaultEnabledForTemplateDeployment": "[steps('SecurityConfig').keyVaultEnabledForTemplateDeployment]",
+            "keyVaultEnabled": "[steps('SecurityConfig').keyVaultEnabled]",
             "keyVaultName": "[steps('SecurityConfig').keyVaultName]",
             "keyVaultCertificateName": "[steps('SecurityConfig').keyVaultCertificateName]",
-            "rgName": "[steps('SecurityConfig').rgName]",
+            "keyVaultRGName": "[steps('SecurityConfig').keyVaultRGName]",
             "adminUsername": "[steps('SecurityConfig').adminUsername]",
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
             "webUsername": "[steps('SecurityConfig').webUsername]",
