@@ -116,17 +116,17 @@
                         "name": "keyVaultEnabled",
                         "type": "Microsoft.Common.DropDown",
                         "label": "Key Vault Enabled",
-                        "defaultValue": "false",
+                        "defaultValue": "True",
                         "toolTip": "Set to true to use a Certificate created in Key Vault. Set to false to explicitly provide the certificate string",
                         "constraints": {
                             "required": true,
                             "allowedValues":[
                                 {
-                                    "label": "true",
+                                    "label": "True",
                                     "value": "true"
                                 },
                                 {
-                                    "label": "false",
+                                    "label": "False",
                                     "value": "false"
                                 }
                             ]
@@ -187,7 +187,7 @@
                     {
                         "name": "keyVaultRGName",
                         "type": "Microsoft.Common.TextBox",
-                        "label": "Resource Group Name",
+                        "label": "Key Vault Resource Group Name",
                         "toolTip": "Name of the Resource Group which contains the Key Vault",
                         "constraints": {
                             "required": true,
