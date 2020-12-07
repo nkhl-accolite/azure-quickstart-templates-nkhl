@@ -5,6 +5,22 @@
     "parameters": {
         "basics": [
             {
+                "name": "stackType",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Stack Type",
+                "toolTip": "Describes the type of the stack configuration",
+                "defaultValue": "Test Stack",
+                "constraints": {
+                    "required": true,
+                    "allowedValues":[
+                        {
+                            "label": "Test Stack",
+                            "value": "Test"
+                        }
+                    ]
+                }
+            },
+            {
                 "name": "stackName",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Stack Name",

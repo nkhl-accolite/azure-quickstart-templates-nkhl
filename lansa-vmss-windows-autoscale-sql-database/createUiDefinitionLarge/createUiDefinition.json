@@ -5,6 +5,22 @@
     "parameters": {
         "basics": [
             {
+                "name": "stackType",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Stack Type",
+                "toolTip": "Describes the type of the stack configuration",
+                "defaultValue": "Large Stack",
+                "constraints": {
+                    "required": true,
+                    "allowedValues":[
+                        {
+                            "label": "Large Stack",
+                            "value": "Large"
+                        }
+                    ]
+                }
+            },
+            {
                 "name": "stackName",
                 "type": "Microsoft.Common.TextBox",
                 "label": "Stack Name",
@@ -301,9 +317,9 @@
             "maxSizeBytes": "1099511627776",
             "databaseLogin": "[steps('DatabaseConfig').databaseLogin]",
             "databaseLoginPassword": "[steps('DatabaseConfig').databaseLoginPassword]",
-            "applicationGatewaySkuTier": "Standard_v2",
+            "applicationGatewaySkuTier": "WAF_v2",
             "agpublicIPAllocationMethod": "Static",
-            "agpublicIpSku": "WAF_v2",
+            "agpublicIpSku": "Standard",
             "enableAutoscaling": true,
             "autoScaleMinCapacity": 2,
             "autoScaleMaxCapacity": 30
