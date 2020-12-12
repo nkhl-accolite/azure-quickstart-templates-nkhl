@@ -116,7 +116,7 @@
                         "name": "keyVaultEnabled",
                         "type": "Microsoft.Common.DropDown",
                         "label": "Key Vault Enabled",
-                        "defaultValue": "false",
+                        "defaultValue": "True",
                         "toolTip": "Set to true to use a Certificate created in Key Vault. Set to false to explicitly provide the certificate string",
                         "constraints": {
                             "required": true,
