@@ -223,6 +223,7 @@
       },
       "certificatePassword": {
          "type": "securestring",
+         "defaultValue": "",
          "metadata": {
             "description": "SSL certificate password"
          }

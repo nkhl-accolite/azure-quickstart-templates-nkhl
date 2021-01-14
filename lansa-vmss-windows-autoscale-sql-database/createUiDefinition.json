@@ -209,7 +209,8 @@
                         },
                         "constraints": {
                             "required": true
-                        }
+                        },
+                        "visible": "[equals(steps('SecurityConfig').keyVaultEnabled, 'false')]"
                     },
                     {
                         "name": "keyVaultName",
