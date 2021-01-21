@@ -1,0 +1,7 @@
+https://agscript.australiaeast.cloudapp.azure.com/cgi-bin/probe
+https://agscript.australiaeast.cloudapp.azure.com/cgi-bin/lansaweb?wam=DEPTABWA&webrtn=BuildFirst&ml=LANSA:XHTML&part=DEX&lang=ENG
+https://agscript.australiaeast.cloudapp.azure.com/cgi-bin/lansaweb?wam=JSMLICE&webrtn=weblic&ml=LANSA:XHTML&part=DEX&lang=ENG
+
+
+agrgak1vmss.eastus
+agscript.australiaeast

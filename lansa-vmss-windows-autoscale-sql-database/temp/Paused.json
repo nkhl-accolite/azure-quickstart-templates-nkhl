@@ -1,0 +1,39 @@
+    {
+      "sku": {
+        "name": "GP_S_Gen5",
+        "tier": "GeneralPurpose",
+        "family": "Gen5",
+        "capacity": 1
+      },
+      "kind": "v12.0,user,vcore,serverless",
+      "properties": {
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
+        "maxSizeBytes": 34359738368,
+        "status": "Paused",
+        "databaseId": "6e057851-2c5d-46fd-b98f-662f16f96e2b",
+        "creationDate": "2020-07-07T08:02:26.72Z",
+        "currentServiceObjectiveName": "GP_S_Gen5_1",
+        "requestedServiceObjectiveName": "GP_S_Gen5_1",
+        "defaultSecondaryLocation": "australiasoutheast",
+        "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+        "zoneRedundant": false,
+        "maxLogSizeBytes": 10307502080,
+        "earliestRestoreDate": "2020-11-10T00:00:00Z",
+        "readScale": "Disabled",
+        "readReplicaCount": 0,
+        "currentSku": {
+          "name": "GP_S_Gen5",
+          "tier": "GeneralPurpose",
+          "family": "Gen5",
+          "capacity": 1
+        },
+        "autoPauseDelay": 60,
+        "minCapacity": 0.5,
+        "pausedDate": "2020-11-04T23:58:18.97Z"
+      },
+      "location": "australiaeast",
+      "tags": {},
+      "id": "/subscriptions/739c4e86-bd75-4910-8d6e-d7eb23ab94f3/resourceGroups/Shared/providers/Microsoft.Sql/servers/testsrv-dp/databases/test-rg",
+      "name": "test-rg",
+      "type": "Microsoft.Sql/servers/databases"
+    },

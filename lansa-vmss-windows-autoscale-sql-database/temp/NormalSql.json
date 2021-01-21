@@ -1,0 +1,39 @@
+{
+  "sku": {
+    "name": "GP_Gen5",
+    "tier": "GeneralPurpose",
+    "family": "Gen5",
+    "capacity": 2
+  },
+  "kind": "v12.0,user,vcore",
+  "properties": {
+    "collation": "SQL_Latin1_General_CP1_CI_AS",
+    "maxSizeBytes": 1073741824,
+    "status": "Online",
+    "databaseId": "1205acbd-9e42-45f0-8da7-75f4442597fe",
+    "creationDate": "2020-11-17T04:31:50.687Z",
+    "currentServiceObjectiveName": "GP_Gen5_2",
+    "requestedServiceObjectiveName": "GP_Gen5_2",
+    "defaultSecondaryLocation": "australiasoutheast",
+    "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+    "zoneRedundant": false,
+    "licenseType": "LicenseIncluded",
+    "maxLogSizeBytes": 322122547,
+    "earliestRestoreDate": "2020-11-17T04:33:44Z",
+    "readScale": "Disabled",
+    "readReplicaCount": 0,
+    "currentSku": {
+      "name": "GP_Gen5",
+      "tier": "GeneralPurpose",
+      "family": "Gen5",
+      "capacity": 2
+    }
+  },
+  "location": "australiaeast",
+  "tags": {
+    "displayName": "Database"
+  },
+  "id": "/subscriptions/edff5157-5735-4ceb-af94-526e2c235e80/resourceGroups/test-sql/providers/Microsoft.Sql/servers/test-sql5sqlserver/databases/lansa",
+  "name": "lansa",
+  "type": "Microsoft.Sql/servers/databases"
+}
