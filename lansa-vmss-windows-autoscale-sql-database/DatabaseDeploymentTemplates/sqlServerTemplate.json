@@ -160,7 +160,7 @@
         {
             "name": "[parameters('networkSecurityGroupName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2019-07-01",
             "location": "[parameters('location')]",
             "properties": {
                 "securityRules": "[parameters('networkSecurityGroupRules')]"
@@ -181,7 +181,7 @@
         {
             "name": "[parameters('publicIpAddressName')]",
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2019-07-01",
             "location": "[parameters('location')]",
             "properties": {
                 "publicIpAllocationMethod": "[parameters('publicIpAddressType')]"
