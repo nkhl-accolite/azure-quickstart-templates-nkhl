@@ -602,6 +602,44 @@
       "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]"
    },
    "resources": [
+       {
+         "condition": "[equals(parameters('keyVaultEnabled'), 'true')]",
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "2020-06-01",
+         "name": "dynamicSecret",
+         "properties": {
+            "mode": "Incremental",
+            "expressionEvaluationOptions": {
+               "scope": "inner"
+            },
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "parameters": {
+                  "vaultCertificate": {
+                     "type": "string"
+                  }
+               },
+               "resources": [],
+               "outputs": {
+                  "kvCert": {
+                     "value": "[parameters('vaultCertificate')]",
+                     "type": "string"
+                  }
+               }
+            },
+            "parameters": {
+               "vaultCertificate": {
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(parameters('keyVaultRGName'), 'Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultCertificateName')]"
+                  }
+               }
+            }
+         }
+      },
       {
          "type": "Microsoft.Network/virtualNetworks",
          "name": "[variables('virtualNetworkName')]",
