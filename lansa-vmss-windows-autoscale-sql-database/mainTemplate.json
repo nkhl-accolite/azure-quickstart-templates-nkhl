@@ -602,6 +602,19 @@
       "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]"
    },
    "resources": [
+	{
+        "apiVersion": "2020-06-01",
+        "name": "pid-5990c833-d17a-5616-8ab3-144d90fea6e9",
+        "type": "Microsoft.Resources/deployments",
+        "properties": {
+            "mode": "Incremental",
+            "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "resources": []
+            }
+        }
+      },
        {
          "condition": "[equals(parameters('keyVaultEnabled'), 'true')]",
          "type": "Microsoft.Resources/deployments",
