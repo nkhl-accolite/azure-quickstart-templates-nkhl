@@ -251,11 +251,11 @@
       },
       "minimumInstanceCount": {
          "type": "int",
-         "defaultValue": 2,
+         "defaultValue": 1,
          "metadata": {
             "description": "Minimum number of Virtual Machine instances (1 to 600)."
          },
-         "minValue": 2,
+         "minValue": 1,
          "maxValue": 600
       },
       "maximumInstanceCount": {
@@ -505,13 +505,11 @@
       "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
       "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "longNamingInfix": "[toLower(parameters('stackName'))]",
-      //"dblongNamingInfix": "[toLower(concat('db',parameters('stackName')))]",
       "dbvmssName": "[toLower(substring(concat('db',parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
       "addressPrefix": "10.0.0.0/16",
       "subnetPrefix": "10.0.0.0/24",
       "virtualNetworkName": "[concat(variables('namingInfix'), 'vnet')]",
       "publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
-      //"dbpublicIPAddressName": "[concat(variables('namingInfix'), 'dbpip')]",
       "subnetName": "[concat(variables('namingInfix'), 'subnet')]",
       "frontEndNSGName" : "[toLower(concat(variables('namingInfix'), 'nsg'))]",
       "loadBalancerName": "[concat(variables('namingInfix'), 'lb')]",
@@ -925,7 +923,7 @@
          "sku": {
             "name": "[parameters('virtualMachineSize')]",
             "tier": "Standard",
-            "capacity": 2
+            "capacity": "[parameters('minimumInstanceCount')]"
          },
          "plan": "[if(variables('isCustomImage'), json('null'), variables('imagePlan'))]",
          "properties": {
@@ -972,10 +970,12 @@
                                        {
                                           "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', variables('loadBalancerName'), variables('natPoolName'))]"
                                        }
+                                    ],
+				    "applicationGatewayBackendAddressPools": [
+                                       {
+                                          "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('agName'), variables('agBackendAddressPoolName'))]"
+                                       }
                                     ]
-                                     
-                                 
-                                    
                                  }
                               }
                            ]
