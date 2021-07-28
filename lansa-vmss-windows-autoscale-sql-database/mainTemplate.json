@@ -826,7 +826,7 @@
          "sku": {
             "name": "[parameters('dbVirtualMachineSize')]",
             "tier": "Standard",
-            "capacity": 1
+            "capacity": "[parameters('minimumInstanceCount')]"
          },
          "plan": "[if(variables('isCustomImage'), json('null'), variables('imagePlan'))]",
          "properties": {
