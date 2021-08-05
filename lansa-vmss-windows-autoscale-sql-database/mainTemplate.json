@@ -529,7 +529,7 @@
       "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
       "frontEndIPConfigID": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('loadBalancerName'), variables('lbFrontEndName'))]",
       "marketplaceSettings": {
-      
+
          "Windows Server 2019": {
             "offer": "lansa-scalable-license",
             "version": {
@@ -639,7 +639,7 @@
             }
          }
       },
-    {  
+    {
       "apiVersion": "2019-11-01",
       "type": "Microsoft.Network/networkSecurityGroups",
       "name": "[variables('frontEndNSGName')]",
@@ -668,6 +668,9 @@
          "name": "[variables('virtualNetworkName')]",
          "location": "[parameters('location')]",
          "apiVersion": "2019-08-01",
+         "dependsOn": [
+            "[ResourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]"
+         ],
          "properties": {
             "addressSpace": {
                "addressPrefixes": [
@@ -797,7 +800,7 @@
             ]
          }
       },
-      
+
       {
          "type": "Microsoft.Compute/virtualMachineScaleSets",
          "name": "[variables('dbvmssName')]",
