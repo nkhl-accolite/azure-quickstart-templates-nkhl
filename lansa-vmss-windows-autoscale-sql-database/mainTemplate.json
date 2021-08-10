@@ -13,7 +13,9 @@
          "type": "string",
          "allowedValues": [
             "Windows Server 2019",
+            "Windows Server 2019 JPN",
             "Windows Server 2016",
+            "Windows Server 2016 JPN",
             "Windows Server 2012"
          ],
          "defaultValue": "Windows Server 2019",
