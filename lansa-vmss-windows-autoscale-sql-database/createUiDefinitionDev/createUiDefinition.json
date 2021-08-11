@@ -91,13 +91,22 @@
                             "value": "Windows Server 2019"
                         },
                         {
+                            "label": "Windows Server 2019 JPN",
+                            "value": "Windows Server 2019 JPN"
+                        },
+                        {
                             "label": "Windows Server 2016",
                             "value": "Windows Server 2016"
+                        },
+                        {
+                            "label": "Windows Server 2016 JPN",
+                            "value": "Windows Server 2016 JPN"
                         },
                         {
                             "label": "Windows Server 2012",
                             "value": "Windows Server 2012"
                         }
+
                     ]
                 }
             }
@@ -264,6 +273,18 @@
                 "bladeTitle": "Database",
                 "elements": [
                     {
+                        "name": "collation",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "Collation",
+                        "toolTip": "The new database collation for governing the proper use of characters.",
+                        "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^(?!\\s*$).+",
+                            "validationMessage": "The value must not be empty."
+                        }
+                    },
+                    {
                         "name": "databaseLogin",
                         "type": "Microsoft.Common.TextBox",
                         "label": "Database Login",
@@ -310,6 +331,7 @@
             "adminPassword": "[steps('SecurityConfig').adminPassword]",
             "webUsername": "[steps('SecurityConfig').webUsername]",
             "webPassword": "[steps('SecurityConfig').webPassword]",
+            "collation": "[steps('DatabaseConfig').collation]",
             "edition": "Serverless",
             "serverlessDbCapacity": 1,
             "dbMinCapacity": "0.5",

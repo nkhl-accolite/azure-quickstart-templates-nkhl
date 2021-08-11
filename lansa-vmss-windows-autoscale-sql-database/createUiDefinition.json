@@ -75,8 +75,16 @@
                             "value": "Windows Server 2019"
                         },
                         {
+                            "label": "Windows Server 2019 JPN",
+                            "value": "Windows Server 2019 JPN"
+                        },
+                        {
                             "label": "Windows Server 2016",
                             "value": "Windows Server 2016"
+                        },
+                        {
+                            "label": "Windows Server 2016 JPN",
+                            "value": "Windows Server 2016 JPN"
                         },
                         {
                             "label": "Windows Server 2012",
