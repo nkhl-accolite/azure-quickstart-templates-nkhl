@@ -151,7 +151,7 @@
     },
     "resources": [
         {
-            "apiVersion": "2019-09-01",
+            "apiVersion": "2019-11-01",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[parameters('virtualNetworkName')]",
             "location": "[parameters('location')]",
@@ -164,7 +164,7 @@
             },
             "resources": [
                 {
-                    "apiVersion": "2019-09-01",
+                    "apiVersion": "2019-11-01",
                     "type": "subnets",
                     "location": "[parameters('location')]",
                     "name": "[parameters('subnetName')]",
