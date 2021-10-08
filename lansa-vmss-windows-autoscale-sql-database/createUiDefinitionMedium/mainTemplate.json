@@ -1,0 +1,1341 @@
+{
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+   "contentVersion": "1.0.0.0",
+   "parameters": {
+      "location": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().location]",
+         "metadata": {
+            "description": "Resource Group Location."
+         }
+      },
+      "osName": {
+         "type": "string",
+         "allowedValues": [
+            "Windows Server 2019",
+            "Windows Server 2019 JPN",
+            "Windows Server 2016",
+            "Windows Server 2016 JPN",
+            "Windows Server 2012"
+         ],
+         "defaultValue": "Windows Server 2019",
+         "metadata": {
+            "description": "Choose the Windows Server image version to use "
+         }
+      },
+      "lansaVersion": {
+         "type": "string",
+         "allowedValues": [
+            "V15 GA",
+            "V14 SP2"
+         ],
+         "defaultValue": "V15 GA",
+         "metadata": {
+            "description": "Visual LANSA Version"
+         }
+      },
+      "imageSource": {
+         "type": "string",
+         "allowedValues": [
+            "Marketplace",
+            "Custom"
+
+         ],
+         "defaultValue": "Marketplace",
+         "metadata": {
+            "description": "Location from where the image must be picked"
+         }
+      },
+      "imageId": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "The resource id of the custom image"
+         }
+      },
+      "imageReleaseState": {
+         "type": "string",
+         "allowedValues": [
+            "Production",
+            "Preview"
+         ],
+         "defaultValue": "Production",
+         "metadata": {
+            "description": "Release state of the LANSA Scalable License image.The Preview release state is restricted to a very limited audience."
+         }
+      },
+      "msiURL": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "URL of the LANSA MSI which will be installed on each virtual machine."
+         }
+      },
+      "virtualMachineSize": {
+         "type": "string",
+         "defaultValue": "Standard_B4ms",
+         "metadata": {
+            "description": "Size of the Virtual Machines in the Virtual Machine Scale Set."
+         }
+      },
+      "dbVirtualMachineSize": {
+         "type": "string",
+         "defaultValue": "Standard_B4ms",
+         "metadata": {
+            "description": "Size of the Virtual Machine which manages the database."
+         }
+      },
+      "stackName": {
+         "type": "string",
+         "metadata": {
+            "description": "String used as a base for naming resources. Must be 3-61 characters in length and globally unique across Azure. A hash is prepended to this string for some resources, and resource-specific information is appended. Some identifiers use precisely 9 characters from this name and so it can be useful to use exactly 9. The template pads it out or truncates it as necessary to make it 9 characters long where required."
+         },
+         "minLength" : 3,
+         "maxLength": 61
+      },
+      "applicationGatewaySkuTier": {
+         "type": "string",
+         "allowedValues": [
+            "Standard",
+            "Standard_v2",
+            "WAF",
+            "WAF_v2"
+         ],
+         "defaultValue": "Standard",
+         "metadata": {
+            "description": "Application Gateway SKU Tier"
+         }
+      },
+      "applicationGatewaySkuName": {
+         "type": "string",
+         "allowedValues": [
+            "Standard_Small",
+            "Standard_Medium",
+            "Standard_Large",
+            "WAF_Medium",
+            "WAF_Large"
+         ],
+         "defaultValue": "Standard_Medium",
+         "metadata": {
+            "description": "Application Gateway SKU Name"
+         }
+      },
+      "applicationGatewayCapacity": {
+         "type": "int",
+         "defaultValue": 2,
+         "metadata": {
+            "description": "Number of Application Gateway instances"
+         }
+      },
+      "agpublicIpNewOrExisting": {
+         "type": "string",
+         "defaultValue": "new",
+         "metadata": {
+           "description": "Determines whether or not a new public ip should be provisioned."
+         }
+       },
+       "agpublicIpName": {
+         "type": "string",
+         "defaultValue":"[toLower(concat(parameters('stackName'),'-agpip'))]",
+         "metadata": {
+           "description": "Name of the public ip address"
+         }
+       },
+       "agpublicIpDns": {
+         "type": "string",
+         "defaultValue": "[toLower(concat('ag',parameters('stackName')))]",
+         "metadata": {
+           "description": "DNS of the public ip address for the VM"
+         }
+       },
+       "agpublicIpResourceGroupName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
+       "agpublicIpAllocationMethod": {
+         "type": "string",
+         "defaultValue": "Dynamic",
+         "allowedValues": [
+           "Dynamic",
+           "Static"
+         ],
+         "metadata": {
+           "description": "Allocation method for the public ip address"
+         }
+       },
+       "agpublicIpSku": {
+         "type": "string",
+         "defaultValue": "Basic",
+         "allowedValues": [
+           "Basic",
+           "Standard"
+         ],
+         "metadata": {
+           "description": "Name of the resource group for the public ip address"
+         }
+       },
+      "autoScaleMinCapacity": {
+         "type": "int",
+         "defaultValue": 0,
+         "metadata": {
+            "description": "Lower bound on Application Gateway capacity"
+         }
+      },
+      "autoScaleMaxCapacity": {
+         "type": "int",
+         "defaultValue": 10,
+         "metadata": {
+            "description": "Upper bound on Application Gateway capacity"
+         }
+      },
+      "enableAutoscaling": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Application Gateway Autoscale Configuration object"
+         }
+      },
+      "availabilityZones": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Zone numbers e.g. 1,2,3."
+         }
+      },
+      "keyVaultEnabled": {
+         "type": "string",
+         "defaultValue": "false",
+         "allowedValues": [
+            "true",
+            "false"
+         ],
+         "metadata": {
+            "description": "Set to true to use a Certificate created in Key Vault. Set to false to explicitly provide the certificate string"
+         }
+      },
+      "certificateBase64Encoded": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Base 64 encoded String representing the SSL certificate"
+         }
+      },
+      "certificatePassword": {
+         "type": "securestring",
+         "defaultValue": "",
+         "metadata": {
+            "description": "SSL certificate password"
+         }
+      },
+      "keyVaultName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Name of the Key Vault which contains the Certificate and Secret"
+         }
+      },
+      "keyVaultCertificateName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Name of the Certificate stored in Key Vault"
+         }
+      },
+      "keyVaultRGName": {
+         "type": "string",
+         "defaultValue": "[resourceGroup().name]",
+         "metadata": {
+            "description": "Name of the Resource Group which contains the Key Vault"
+         }
+      },
+      "minimumInstanceCount": {
+         "type": "int",
+         "defaultValue": 1,
+         "metadata": {
+            "description": "Minimum number of Virtual Machine instances (1 to 600)."
+         },
+         "minValue": 1,
+         "maxValue": 600
+      },
+      "maximumInstanceCount": {
+         "type": "int",
+         "defaultValue": 100,
+         "metadata": {
+            "description": "Maximum number of Virtual Machine instances (1 to 600)."
+         },
+         "minValue": 1,
+         "maxValue": 600
+      },
+      "databaseNewOrExisting": {
+        "type": "string",
+        "defaultValue": "new",
+        "allowedValues": [
+            "new",
+            "existing"
+         ],
+        "metadata": {
+          "description": "Determines whether a new SQL database should be provisioned or to use an existing database. Parameters which are relevant to choosing 'new' are prefixed 'New DB'. Parameters which are relevant to choosing 'existing' are prefixed 'Existing DB'."
+        }
+      },
+      "databaseType": {
+         "type": "string",
+         "defaultValue": "SQLAZURE",
+         "allowedValues": [
+            "MSSQLS",
+            "SQLAZURE",
+            "MYSQL"
+         ],
+         "metadata": {
+            "description": "Existing DB. Refer to LANSA documentation for an explanation of each Database Type and the supported versions of the database servers. DO NOT CHANGE THIS IF CREATING A NEW DATABASE. IT MUST BE SET TO SQLAZURE."
+         }
+      },
+      "databaseServerName": {
+         "type": "string",
+         "defaultValue": "lansa",
+         "metadata": {
+            "description": "Existing DB. The name of the existing Database Server to connect to. If the name has /MSSQLSERVER appended, omit it."
+         }
+      },
+      "databaseName": {
+         "type": "string",
+         "defaultValue": "lansa",
+         "metadata": {
+            "description": "The name of the new database to create or name of the existing database to connect to."
+         }
+      },
+      "databaseLogin": {
+         "type": "string",
+         "metadata": {
+            "description": "The admin user of the Azure SQL Database"
+         }
+      },
+      "databaseLoginPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "The password of the admin user of the Azure SQL Database"
+         }
+
+      },
+      "collation": {
+         "type": "string",
+         "defaultValue": "SQL_Latin1_General_CP1_CI_AS",
+         "metadata": {
+            "description": "New DB. The new database collation for governing the proper use of characters."
+         }
+      },
+      "edition": {
+         "type": "string",
+         "defaultValue": "Standard",
+         "allowedValues": [
+            "Serverless",
+            "Basic",
+            "Standard",
+            "Premium"
+         ],
+         "metadata": {
+            "description": "New DB. The type of database to create."
+         }
+      },
+      "requestedServiceObjectiveName": {
+         "type": "string",
+         "defaultValue": "S2",
+         "allowedValues": [
+            "Basic",
+            "S0",
+            "S1",
+            "S2",
+            "S3",
+            "S4",
+            "S6",
+            "S7",
+            "S9",
+            "S12",
+            "P1",
+            "P2",
+            "P4",
+            "P6",
+            "P11",
+            "P15"
+         ],
+         "metadata": {
+            "description": "New DB. Describes the performance level for Edition"
+         }
+      },
+      "serverlessDbCapacity": {
+         "type": "int",
+         "defaultValue": 1,
+         "allowedValues": [
+            1,
+            2,
+            4,
+            6,
+            8,
+            10,
+            12,
+            14,
+            16,
+            18,
+            20,
+            24,
+            32,
+            40
+         ],
+         "metadata": {
+            "description": "Capacity of the particular SKU"
+         }
+      },
+      "dbMinCapacity": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "The minimum capacity that the database will always have allocated, if not paused"
+         }
+      },
+      "autoPauseDelay": {
+         "type": "int",
+         "defaultValue": 60,
+         "metadata": {
+            "description": "Time in minutes after which database is automatically paused"
+         }
+      },
+      "maxSizeBytes": {
+         "type": "string",
+         "defaultValue": "1073741824",
+         "metadata": {
+            "description": "New DB. The maximum size, in bytes, for the new database"
+         }
+      },
+      "adminUsername": {
+         "type": "string",
+         "metadata": {
+            "description": "Admin username on all VMs."
+         }
+      },
+      "adminPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "Admin password on all VMs."
+         }
+      },
+      "webUsername": {
+         "type": "string",
+         "metadata": {
+            "description": "Web Server username on all VMs. This must be different to the Admin Username."
+         }
+      },
+      "webPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "Web Server password on all VMs."
+         }
+      },
+      "webServerMaxConnect": {
+         "type": "string",
+         "defaultValue": "20",
+         "metadata": {
+            "description": "The maximum number of LANSA jobs to run on each Web Server. Setting triggerWebConfig will cause this value to be updated."
+         }
+      },
+      "installMSI": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Install the MSI: Set this to 1 to execute an MSI install. Usually set to 0 when updating the stack"
+         }
+      },
+      "updateMSI": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Update Stack: Set this to 1 to execute an MSI Upgrade. Obtains the specified MSI and installs it. Ensure the LansaMSI parameter is set correctly. If the LansaMSI parameter is not different a repair will be performed"
+         }
+      },
+      "uninstallMSI": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Uninstall the MSI: Set this to 1 to uninstall the MSI. The MSI used to uninstall, is the last one that was installed. It is called c:\\lansa\\MyApp.msi"
+         }
+      },
+      "triggerWebConfig": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Update Stack: Set this to 1 to update the web configuration"
+         }
+      },
+      "gitBranch": {
+         "type": "string",
+         "defaultValue": "support/scalable",
+         "metadata": {
+            "description": "Git Branch"
+         }
+      },
+      "trace": {
+         "type": "string",
+         "defaultValue": "N",
+         "allowedValues": [
+            "Y",
+            "N"
+         ],
+         "metadata": {
+            "description": "Switch tracing on. Allowed values Y or N"
+         }
+      },
+      "fixLicense": {
+         "type": "string",
+         "defaultValue": "0",
+         "metadata": {
+            "description": "Re-run licensing. It is unlikely that this parameter needs to be used"
+         }
+      }
+   },
+   "variables": {
+      "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
+      "addAGName" : "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))]",
+      "autoScaleConfig" : {
+         "minCapacity": "[parameters('autoScaleMinCapacity')]",
+         "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
+      },
+      "zonesArray": "[split(replace(replace(replace(parameters('availabilityZones'), '[', ''), ']', ''), '\"', ''), ',')]",
+      "isDatabaseServerless": "[equals(parameters('edition'), 'Serverless')]",
+      "dbSkuName": "[if(variables('isDatabaseServerless'), 'GP_S_Gen5', parameters('requestedServiceObjectiveName'))]",
+      "isPreview": "[equals(parameters('imageReleaseState'), 'Preview')]",
+      "isNewDatabase": "[equals(parameters('databaseNewOrExisting'), 'new')]",
+      "namingInfix": "[toLower(substring(concat(parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
+      "longNamingInfix": "[toLower(parameters('stackName'))]",
+      "dbvmssName": "[toLower(substring(concat('db',parameters('stackName'), uniqueString(resourceGroup().id)), 0, 9))]",
+      "addressPrefix": "10.0.0.0/16",
+      "subnetPrefix": "10.0.0.0/24",
+      "virtualNetworkName": "[concat(variables('namingInfix'), 'vnet')]",
+      "publicIPAddressName": "[concat(variables('namingInfix'), 'pip')]",
+      "subnetName": "[concat(variables('namingInfix'), 'subnet')]",
+      "frontEndNSGName" : "[toLower(concat(variables('namingInfix'), 'nsg'))]",
+      "loadBalancerName": "[concat(variables('namingInfix'), 'lb')]",
+      "lbFrontEndName": "LoadBalancerFrontEnd",
+      "lbProbeName": "LoadBalancerProbe",
+      "natDBPoolName": "[concat(variables('namingInfix'), 'natDBpool')]",
+      "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+      "natPoolName": "[concat(variables('namingInfix'), 'natpool')]",
+      "bePoolName": "[concat(variables('namingInfix'), 'bepool')]",
+      "natStartPort": 50002,
+      "natEndPort": 50601,
+      "natBackendPort": 3389,
+      "natDBStartPort": 50000,
+      "natDBEndPort": 50001,
+      "natDBBackendPort": 3389,
+      "nicName": "[concat(variables('namingInfix'), 'nic')]",
+      "ipConfigName": "[concat(variables('namingInfix'), 'ipconfig')]",
+      "frontEndIPConfigID": "[resourceId('Microsoft.Network/loadBalancers/frontendIPConfigurations', variables('loadBalancerName'), variables('lbFrontEndName'))]",
+      "marketplaceSettings": {
+
+         "Windows Server 2019": {
+            "offer": "lansa-scalable-license",
+            "version": {
+               "V15 GA": {
+                  "sku": "w19d-15-0"
+               },
+               "V14 SP2": {
+                  "sku": "w19d-14-2"
+               }
+            }
+         },
+         "Windows Server 2019 JPN": {
+            "offer": "lansa-scalable-license",
+            "version": {
+               "V15 GA": {
+                  "sku": "w19d-15-0j"
+               },
+               "V14 SP2": {
+                  "sku": "w19d-14-2j"
+               }
+            }
+         },
+         "Windows Server 2016": {
+            "offer": "lansa-scalable-license",
+            "version": {
+               "V15 GA": {
+                  "sku": "w16d-15-0"
+               },
+               "V14 SP2": {
+                  "sku": "w16d-14-2"
+               }
+            }
+         },
+         "Windows Server 2016 JPN": {
+            "offer": "lansa-scalable-license",
+            "version": {
+               "V15 GA": {
+                  "sku": "w16d-15-0j"
+               },
+               "V14 SP2": {
+                  "sku": "w16d-14-2j"
+               }
+            }
+         },
+         "Windows Server 2012": {
+            "offer": "lansa-scalable-license",
+            "version": {
+               "V15 GA": {
+                  "sku": "w12r2d-15-0"
+               },
+               "V14 SP2": {
+                  "sku": "lansa-scalable-license-14-2"
+               }
+            }
+         }
+      },
+      "imagePublisher": "lansa",
+      "imageSku": "[variables('marketplaceSettings')[parameters('osName')].version[parameters('lansaVersion')].sku]",
+      "imageOfferName": "[concat(variables('marketplaceSettings')[parameters('osName')].offer, if (variables('isPreview'), '-preview', ''))]",
+      "osType": {
+         "publisher": "[variables('imagePublisher')]",
+         "offer": "[variables('imageOfferName')]",
+         "sku": "[variables('imageSku')]",
+         "version": "latest"
+      },
+      "imageResourceId": {
+         "id": "[parameters('imageId')]"
+      },
+      "imageReference": "[if(variables('isCustomImage'), variables('imageResourceId'), variables('osType'))]",
+      "imagePlan" : {
+         "name": "[variables('imageSKU')]",
+         "product": "[variables('imageOfferName')]",
+         "publisher": "[variables('imagePublisher')]"
+      },
+      "sqlserverName": "[concat(variables('namingInfix'), 'sqlserver')]",
+      "q": "'",
+      "isAgPublicIPNew": "[equals(parameters('agpublicIpNewOrExisting'), 'new')]",
+      "agPublicIPAddressName": "[parameters('agpublicIpName')]",
+      "agPublicIPAddressID": "[if(variables('isAgPublicIPNew'), resourceId('Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName')), resourceId(parameters('agpublicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses',variables('agPublicIPAddressName')))]",
+      "agResourceDependsOn": "[if(variables('isAgPublicIPNew'), resourceId('Microsoft.Network/publicIPAddresses', variables('agPublicIPAddressName')), json('null'))]",
+      "agSubnetPrefix": "10.0.1.0/24",
+      "agSubnetName": "[concat(variables('namingInfix'), '-agsubnet')]",
+      "agSubnetID": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('agsubnetName'))]",
+      "agName": "[concat(variables('namingInfix'), '-ag')]",
+      "agHttpListenerName": "appGatewayHttpListener",
+      "agFrontendIPName": "appGatewayFrontendIP",
+      "agFrontendPortName": "appGatewayFrontendPort",
+      "agSslCertName": "appGatewaySslCert",
+      "agBackendHttpSettingsName": "appGatewayBackendHttpSettings",
+      "agBackendAddressPoolName": "[concat(variables('namingInfix'), '-agpool')]"
+   },
+   "resources": [
+        {
+            "apiVersion": "2020-06-01",
+            "name": "pid-0522366e-9eeb-4a58-bc01-1e19774ee147-partnercenter",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        },
+       {
+         "condition": "[equals(parameters('keyVaultEnabled'), 'true')]",
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "2020-06-01",
+         "name": "dynamicSecret",
+         "properties": {
+            "mode": "Incremental",
+            "expressionEvaluationOptions": {
+               "scope": "inner"
+            },
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "parameters": {
+                  "vaultCertificate": {
+                     "type": "string"
+                  }
+               },
+               "resources": [],
+               "outputs": {
+                  "kvCert": {
+                     "value": "[parameters('vaultCertificate')]",
+                     "type": "string"
+                  }
+               }
+            },
+            "parameters": {
+               "vaultCertificate": {
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(parameters('keyVaultRGName'), 'Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultCertificateName')]"
+                  }
+               }
+            }
+         }
+      },
+    {
+      "apiVersion": "2019-11-01",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('frontEndNSGName')]",
+      "location": "[parameters('location')]",
+       "properties": {
+         "securityRules": [
+           {
+            "name": "rdp-rule",
+            "properties": {
+            "description": "Allow RDP",
+            "protocol": "Tcp",
+            "sourcePortRange": "*",
+            "destinationPortRange": "3389",
+            "sourceAddressPrefix": "Internet",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Inbound"
+         }
+       }
+     ]
+  }
+},
+      {
+         "type": "Microsoft.Network/virtualNetworks",
+         "name": "[variables('virtualNetworkName')]",
+         "location": "[parameters('location')]",
+         "apiVersion": "2019-11-01",
+         "dependsOn": [
+            "[ResourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]"
+         ],
+         "properties": {
+            "addressSpace": {
+               "addressPrefixes": [
+                  "[variables('addressPrefix')]"
+               ]
+            },
+            "subnets": [
+               {
+                  "name": "[variables('subnetName')]",
+                  "properties": {
+                     "addressPrefix": "[variables('subnetPrefix')]",
+                     "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('frontEndNSGName'))]"
+                      }
+                  }
+               },
+               {
+                  "name": "[variables('agSubnetName')]",
+                  "properties": {
+                     "addressPrefix": "[variables('agSubnetPrefix')]"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "type": "Microsoft.Network/publicIPAddresses",
+         "name": "[variables('publicIPAddressName')]",
+         "location": "[parameters('location')]",
+         "apiVersion": "2019-11-01",
+         "sku": {
+            "name": "Standard"
+         },
+         "properties": {
+            "publicIPAllocationMethod": "Static",
+            "dnsSettings": {
+               "domainNameLabel": "[variables('longNamingInfix')]"
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Network/loadBalancers",
+         "name": "[variables('loadBalancerName')]",
+         "location": "[parameters('location')]",
+         "apiVersion": "2019-11-01",
+         "sku": {
+            "name": "Standard"
+         },
+         "dependsOn": [
+            "[ResourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+         ],
+         "properties": {
+            "frontendIPConfigurations": [
+               {
+                  "name": "[variables('lbFrontEndName')]",
+                  "properties": {
+                     "publicIPAddress": {
+                        "id": "[variables('publicIPAddressID')]"
+                     }
+                  }
+               }
+            ],
+            "backendAddressPools": [
+               {
+                  "name": "[variables('bePoolName')]"
+               }
+
+            ],
+            "inboundNatPools": [
+               {
+                  "name": "[variables('natPoolName')]",
+                  "properties": {
+                     "frontendIPConfiguration": {
+                        "id": "[variables('frontEndIPConfigID')]"
+                     },
+                     "protocol": "Tcp",
+                     "frontendPortRangeStart": "[variables('natStartPort')]",
+                     "frontendPortRangeEnd": "[variables('natEndPort')]",
+                     "backendPort": "[variables('natBackendPort')]"
+                  }
+               },
+               {
+                  "name": "[variables('natDBPoolName')]",
+                  "properties": {
+                     "frontendIPConfiguration": {
+                        "id": "[variables('frontEndIPConfigID')]"
+                     },
+                     "protocol": "Tcp",
+                     "frontendPortRangeStart": "[variables('natDBStartPort')]",
+                     "frontendPortRangeEnd": "[variables('natDBEndPort')]",
+                     "backendPort": "[variables('natDBBackendPort')]"
+                  }
+               }
+            ],
+            "loadBalancingRules": [
+               {
+                  "name": "lbrule",
+                  "properties": {
+                     "frontendIPConfiguration": {
+                        "id": "[variables('frontEndIPConfigID')]"
+                     },
+                     "backendAddressPool": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadbalancerName'), variables('bePoolName'))]"
+                     },
+                     "probe": {
+                        "id": "[resourceId('Microsoft.Network/loadBalancers/probes', variables('loadbalancerName'), variables('lbProbeName'))]"
+                     },
+                     "protocol": "Tcp",
+                     "loadDistribution": "SourceIP",
+                     "frontendPort": 80,
+                     "backendPort": 80,
+                     "idleTimeoutInMinutes": 15
+                  }
+               }
+            ],
+            "probes": [
+               {
+                  "name": "[variables('lbProbeName')]",
+                  "properties": {
+                     "protocol": "Http",
+                     "port": 80,
+                     "intervalInSeconds": 15,
+                     "numberOfProbes": 2,
+                     "requestPath": "cgi-bin/probe"
+                  }
+               }
+            ]
+         }
+      },
+
+      {
+         "type": "Microsoft.Compute/virtualMachineScaleSets",
+         "name": "[variables('dbvmssName')]",
+         "location": "[parameters('location')]",
+         "apiVersion": "2019-12-01",
+         "dependsOn": [
+            "[ResourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
+            "[ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+            "[ResourceId('Microsoft.Sql/servers', variables('sqlserverName'))]",
+            "[ResourceId('Microsoft.Sql/servers/databases', variables('sqlserverName'), parameters('databaseName'))]",
+            "[ResourceId('Microsoft.Network/applicationGateways', variables('agName'))]"
+         ],
+         "sku": {
+            "name": "[parameters('dbVirtualMachineSize')]",
+            "tier": "Standard",
+            "capacity": 1
+         },
+         "plan": "[if(variables('isCustomImage'), json('null'), variables('imagePlan'))]",
+         "properties": {
+            "overprovision": false,
+            "upgradePolicy": {
+               "mode": "Automatic"
+            },
+            "virtualMachineProfile": {
+               "storageProfile": {
+                  "osDisk": {
+                     "caching": "ReadOnly",
+                     "createOption": "FromImage"
+                  },
+                  "imageReference": "[variables('imageReference')]"
+               },
+               "osProfile": {
+                  "computerNamePrefix": "[variables('dbvmssName')]",
+                  "adminUsername": "[parameters('adminUsername')]",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "windowsConfiguration": {
+                     "provisionVMAgent": true
+                  }
+               },
+               "networkProfile": {
+                  "networkInterfaceConfigurations": [
+                     {
+                        "name": "[concat('db', variables('nicName'))]",
+                        "properties": {
+                           "primary": true,
+                           "ipConfigurations": [
+                              {
+                                 "name": "[concat( 'db',variables('ipConfigName'))]",
+                                 "properties": {
+                                    "subnet": {
+                                       "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+                                    },
+                                    "loadBalancerBackendAddressPools": [
+                                       {
+                                          "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('bePoolName'))]"
+                                       }
+                                    ],
+                                    "loadBalancerInboundNatPools": [
+                                       {
+                                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', variables('loadBalancerName'), variables('natDBPoolName'))]"
+                                       }
+                                    ],
+                                    "applicationGatewayBackendAddressPools": [
+                                       {
+                                          "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('agName'), variables('agBackendAddressPoolName'))]"
+                                       }
+                                    ]
+                                 }
+                              }
+                           ]
+                        }
+                     }
+                  ]
+               },
+               "extensionProfile": {
+                  "extensions": [
+                     {
+                        "name": "FirstInstall",
+                        "properties": {
+                           "publisher": "Microsoft.Compute",
+                           "type": "CustomScriptExtension",
+                           "typeHandlerVersion": "1.9",
+                           "autoUpgradeMinorVersion": true,
+                           "forceUpdateTag": "[concat( parameters('installMSI'),parameters('updateMSI'),parameters('triggerWebConfig'),parameters('UninstallMSI'),parameters('fixLicense'), parameters('trace'), parameters('gitBranch') )]",
+                           "protectedSettings": {
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;c:\\lansa\\scripts\\git-pull.ps1 ', parameters('gitBranch'), ';popd;', 'pushd;c:\\lansa\\scripts\\azure-custom-script.ps1 ', '-server_name ',variables('Q'), if(variables('isNewDatabase'), reference(variables('sqlserverName')).fullyQualifiedDomainName, parameters('databaseServerName')), variables('Q'), ' -DBUT ', variables('Q'), parameters('databaseType'), variables('Q'), ' -dbname ', variables('Q'), parameters('databaseName'), variables('Q'), ' -dbuser ', variables('Q'), parameters('databaseLogin'), variables('Q'), ' -dbpassword ', variables('Q'),  parameters('databaseLoginPassword'), variables('Q'), ' -webuser ', variables('Q'),  parameters('webUsername'), variables('Q'), ' -webpassword ', variables('Q'),  parameters('webPassword'), variables('Q'), ' -MSIuri ', variables('Q'),  parameters('msiURL'), variables('Q'),  ' -maxconnections ', variables('Q'),  parameters('webServerMaxConnect'), variables('Q'), ' -trace ', variables('Q'),  parameters('trace'), variables('Q'), ' -installMSI ', variables('Q'),  parameters('installMSI'), variables('Q'), ' -updateMSI ', variables('Q'),  parameters('updateMSI'), variables('Q'),' -triggerWebConfig ', variables('Q'),  parameters('triggerWebConfig'), variables('Q'),' -UninstallMSI ', variables('Q'),  parameters('UninstallMSI'), variables('Q'), ' -fixLicense ', variables('Q'),  parameters('fixLicense'), variables('Q'), ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE}; exit 0;popd;}\"')]"
+                           }
+                        }
+                     }
+                  ]
+               }
+
+
+
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Compute/virtualMachineScaleSets",
+         "name": "[variables('namingInfix')]",
+         "location": "[parameters('location')]",
+         "apiVersion": "2019-12-01",
+         "dependsOn": [
+            "[ResourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
+            "[ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+            "[ResourceId('Microsoft.Sql/servers', variables('sqlserverName'))]",
+            "[ResourceId('Microsoft.Sql/servers/databases', variables('sqlserverName'), parameters('databaseName'))]",
+            "[ResourceId('Microsoft.Compute/virtualMachineScaleSets', variables('dbvmssName'))]"
+         ],
+         "sku": {
+            "name": "[parameters('virtualMachineSize')]",
+            "tier": "Standard",
+            "capacity": "[parameters('minimumInstanceCount')]"
+         },
+         "plan": "[if(variables('isCustomImage'), json('null'), variables('imagePlan'))]",
+         "properties": {
+            "singlePlacementGroup": "[lessOrEquals(parameters('maximumInstanceCount'), 100)]",
+            "overprovision": false,
+            "upgradePolicy": {
+               "mode": "Automatic"
+            },
+            "virtualMachineProfile": {
+               "storageProfile": {
+                  "osDisk": {
+                     "caching": "ReadOnly",
+                     "createOption": "FromImage"
+                  },
+                  "imageReference": "[variables('imageReference')]"
+               },
+               "osProfile": {
+                  "computerNamePrefix": "[variables('namingInfix')]",
+                  "adminUsername": "[parameters('adminUsername')]",
+                  "adminPassword": "[parameters('adminPassword')]",
+                  "windowsConfiguration": {
+                     "provisionVMAgent": true
+                  }
+               },
+               "networkProfile": {
+                  "networkInterfaceConfigurations": [
+                     {
+                        "name": "[variables('nicName')]",
+                        "properties": {
+                           "primary": true,
+                           "ipConfigurations": [
+                              {
+                                 "name": "[variables('ipConfigName')]",
+                                 "properties": {
+                                    "subnet": {
+                                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+                                     },
+                                     "loadBalancerBackendAddressPools": [
+                                        {
+                                           "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('loadBalancerName'), variables('bePoolName'))]"
+                                        }
+                                     ],
+                                     "loadBalancerInboundNatPools": [
+                                       {
+                                          "id": "[resourceId('Microsoft.Network/loadBalancers/inboundNatPools', variables('loadBalancerName'), variables('natPoolName'))]"
+                                       }
+                                    ],
+				    "applicationGatewayBackendAddressPools": [
+                                       {
+                                          "id": "[resourceId('Microsoft.Network/applicationGateways/backendAddressPools', variables('agName'), variables('agBackendAddressPoolName'))]"
+                                       }
+                                    ]
+                                 }
+                              }
+                           ]
+                        }
+                     }
+                  ]
+               },
+               "extensionProfile": {
+                  "extensions": [
+                     {
+                        "name": "MainInstall",
+                        "properties": {
+                           "publisher": "Microsoft.Compute",
+                           "type": "CustomScriptExtension",
+                           "typeHandlerVersion": "1.9",
+                           "autoUpgradeMinorVersion": true,
+                           "forceUpdateTag": "[concat( parameters('installMSI'),parameters('updateMSI'),parameters('triggerWebConfig'),parameters('UninstallMSI'),parameters('fixLicense'), parameters('trace'), parameters('gitBranch') )]",
+                           "protectedSettings": {
+                              "commandToExecute": "[concat('powershell -NoProfile -ExecutionPolicy unrestricted -command \"& {pushd;c:\\lansa\\scripts\\git-pull.ps1 ', parameters('gitBranch'), ';popd;', 'pushd;c:\\lansa\\scripts\\azure-custom-script.ps1 ', '-SUDB \"0\" -server_name ', variables('Q'),  if(variables('isNewDatabase'), reference(variables('sqlserverName')).fullyQualifiedDomainName, parameters('databaseServerName')), variables('Q'), ' -DBUT ', variables('Q'), parameters('databaseType'), variables('Q'),  ' -dbname ', variables('Q'),  parameters('databaseName'), variables('Q'), ' -dbuser ', variables('Q'),  parameters('databaseLogin'), variables('Q'), ' -dbpassword ', variables('Q'),  parameters('databaseLoginPassword'), variables('Q'), ' -webuser ', variables('Q'),  parameters('webUsername'), variables('Q'), ' -webpassword ', variables('Q'),  parameters('webPassword'), variables('Q'), ' -MSIuri ', variables('Q'),  parameters('msiURL'), variables('Q'),  ' -maxconnections ', variables('Q'),  parameters('webServerMaxConnect'), variables('Q'), ' -trace ', variables('Q'),  parameters('trace'), variables('Q'), ' -installMSI ', variables('Q'),  parameters('installMSI'), variables('Q'), ' -updateMSI ', variables('Q'),  parameters('updateMSI'), variables('Q'),' -triggerWebConfig ', variables('Q'),  parameters('triggerWebConfig'), variables('Q'), ' -UninstallMSI ', variables('Q'),  parameters('UninstallMSI'), variables('Q'), ' -fixLicense ', variables('Q'),  parameters('fixLicense'), variables('Q'),  ';if ($LASTEXITCODE -ne 0) {Write-Error (\"MSI Install failed\");exit $LASTEXITCODE}; exit 0;popd;}\"')]"
+                           }
+                        }
+                     }
+                  ]
+               }
+            }
+         }
+      },
+      {
+         "type": "Microsoft.Insights/autoscaleSettings",
+         "apiVersion": "2015-04-01",
+         "name": "autoscalehost",
+         "location": "[parameters('location')]",
+         "dependsOn": [
+            "[ResourceId('Microsoft.Compute/virtualMachineScaleSets', variables('namingInfix'))]"
+         ],
+         "properties": {
+            "name": "autoscalehost",
+            "targetResourceUri": "[ResourceId('Microsoft.Compute/virtualMachineScaleSets', variables('namingInfix'))]",
+            "enabled": true,
+            "profiles": [
+               {
+                  "name": "Profile1",
+                  "capacity": {
+                     "minimum": "[parameters('minimumInstanceCount')]",
+                     "maximum": "[parameters('maximumInstanceCount')]",
+                     "default": "[parameters('minimumInstanceCount')]"
+                  },
+                  "rules": [
+                     {
+                        "metricTrigger": {
+                           "metricName": "Percentage CPU",
+                           "metricResourceUri": "[ResourceId('Microsoft.Compute/virtualMachineScaleSets', variables('namingInfix'))]",
+                           "timeGrain": "PT1M",
+                           "statistic": "Average",
+                           "timeWindow": "PT5M",
+                           "timeAggregation": "Average",
+                           "operator": "GreaterThan",
+                           "threshold": 60.0
+                        },
+                        "scaleAction": {
+                           "direction": "Increase",
+                           "type": "PercentChangeCount",
+                           "value": "10",
+                           "cooldown": "PT20M"
+                        }
+                     },
+                     {
+                        "metricTrigger": {
+                           "metricName": "Percentage CPU",
+                           "metricResourceUri": "[ResourceId('Microsoft.Compute/virtualMachineScaleSets', variables('namingInfix'))]",
+                           "timeGrain": "PT1M",
+                           "statistic": "Average",
+                           "timeWindow": "PT5M",
+                           "timeAggregation": "Average",
+                           "operator": "LessThan",
+                           "threshold": 30.0
+                        },
+                        "scaleAction": {
+                           "direction": "Decrease",
+                           "type": "ChangeCount",
+                           "value": "1",
+                           "cooldown": "PT20M"
+                        }
+                     }
+                  ]
+               }
+            ]
+         }
+      },
+      {
+         "type": "Microsoft.Insights/autoscaleSettings",
+         "apiVersion": "2015-04-01",
+         "name": "[variables('dbvmssName')]",
+         "location": "[parameters('location')]",
+         "dependsOn": [
+            "[ResourceId('Microsoft.Compute/virtualMachineScaleSets', variables('dbvmssName'))]"
+         ],
+         "properties": {
+            "name": "[variables('dbvmssName')]",
+            "targetResourceUri": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', variables('dbvmssName'))]",
+            "enabled": true,
+            "profiles": [
+               {
+                  "name": "Single Fixed Instance",
+                  "capacity": {
+                     "minimum": "1",
+                     "maximum": "1",
+                     "default": "1"
+                  }
+               }
+            ]
+         }
+      },
+      {
+         "condition": "[variables('isAgPublicIPNew')]",
+         "apiVersion": "2019-11-01",
+         "type": "Microsoft.Network/publicIPAddresses",
+         "name": "[variables('agPublicIPAddressName')]",
+         "location": "[parameters('location')]",
+         "sku": {
+            "name": "[parameters('agpublicIpSku')]"
+         },
+         "properties": {
+            "publicIPAllocationMethod": "[parameters('agpublicIpAllocationMethod')]",
+            "dnsSettings": {
+               "domainNameLabel": "[parameters('agpublicIpDns')]"
+            }
+         }
+      },
+      {
+         "apiVersion": "2019-11-01",
+         "name": "[variables('agName')]",
+         "type": "Microsoft.Network/applicationGateways",
+         "location": "[parameters('location')]",
+         "dependsOn": [
+            "[ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+            "[coalesce(variables('agResourceDependsOn'), ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName')))]"
+         ],
+         "properties": {
+            "sku": {
+                "tier": "[parameters('applicationGatewaySkuTier')]",
+                "name": "[if(variables('addAGName'), parameters('applicationGatewaySkuName'), parameters('applicationGatewaySkuTier'))]",
+                "capacity": "[if(variables('addAGName'), parameters('applicationGatewayCapacity'), if(parameters('enableAutoscaling'), json('null'), parameters('applicationGatewayCapacity')))]"
+            },
+            "sslCertificates": [
+               {
+                  "name": "[variables('agSslCertName')]",
+                  "properties": {
+                     "data": "[if(equals(parameters('keyVaultEnabled'),'true'), reference('dynamicSecret').outputs.kvCert.value, parameters('certificateBase64Encoded'))]",
+                     "password": "[if(equals(parameters('keyVaultEnabled'),'true'), json('null'), parameters('certificatePassword'))]"
+                  }
+               }
+            ],
+            "gatewayIPConfigurations": [
+               {
+                  "name": "appGatewayIpConfig",
+                  "properties": {
+                     "subnet": {
+                        "id": "[variables('agSubnetID')]"
+                     }
+                  }
+               }
+            ],
+            "frontendIPConfigurations": [
+               {
+                  "name": "[variables('agFrontendIPName')]",
+                  "properties": {
+                     "PublicIPAddress": {
+                        "id": "[variables('agPublicIPAddressID')]"
+                     }
+                  }
+               }
+            ],
+            "frontendPorts": [
+               {
+                  "name": "[variables('agFrontendPortName')]",
+                  "properties": {
+                     "Port": 443
+                  }
+               }
+            ],
+            "backendAddressPools": [
+               {
+                  "name": "[variables('agBackendAddressPoolName')]"
+               }
+            ],
+            "backendHttpSettingsCollection": [
+               {
+                  "name": "[variables('agBackendHttpSettingsName')]",
+                  "properties": {
+                     "Port": 80,
+                     "Protocol": "Http",
+                     "CookieBasedAffinity": "Enabled",
+                     "RequestTimeout": 120
+                  }
+               }
+            ],
+            "httpListeners": [
+               {
+                  "name": "[variables('agHttpListenerName')]",
+                  "properties": {
+                     "FrontendIPConfiguration": {
+                        "Id": "[resourceId('Microsoft.Network/applicationgateways/frontendIPConfigurations',variables('agName'),variables('agFrontendIPName'))]"
+
+                     },
+                     "FrontendPort": {
+                        "Id": "[resourceId('Microsoft.Network/applicationgateways/frontendPorts',variables('agName'),variables('agFrontendPortName'))]"
+                     },
+                     "Protocol": "Https",
+                     "SslCertificate": {
+                        "Id": "[resourceId('Microsoft.Network/applicationgateways/sslCertificates',variables('agName'),variables('agSslCertName'))]"
+                     }
+                  }
+               }
+            ],
+            "requestRoutingRules": [
+               {
+                  "Name": "rule1",
+                  "properties": {
+                     "RuleType": "Basic",
+                     "httpListener": {
+                        "id": "[resourceId('Microsoft.Network/applicationgateways/httpListeners',variables('agName'),variables('agHttpListenerName'))]"
+                     },
+                     "backendAddressPool": {
+                        "id": "[resourceId('Microsoft.Network/applicationgateways/backendAddressPools',variables('agName'),variables('agBackendAddressPoolName'))]"
+                     },
+                     "backendHttpSettings": {
+                        "id": "[resourceId('Microsoft.Network/applicationgateways/backendHttpSettingsCollection',variables('agName'),variables('agBackendHttpSettingsName'))]"
+                     }
+                  }
+               }
+            ],
+            "autoscaleConfiguration": "[if(parameters('enableAutoscaling'), variables('autoScaleConfig'), json('null'))]"
+         },
+         "zones": "[if(and(equals(parameters('enableAutoscaling'), true()), greater(length(variables('zonesArray')), 0)), if(contains(variables('zonesArray'),''), json('null'), variables('zonesArray')), json('null'))]"
+      },
+      {
+         "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
+         "name": "[variables('sqlserverName')]",
+         "type": "Microsoft.Sql/servers",
+         "location": "[parameters('location')]",
+         "dependsOn": [
+            "[ResourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName'))]",
+            "[ResourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]"
+         ],
+         "tags": {
+            "displayName": "SqlServer"
+         },
+         "apiVersion": "2019-06-01-preview",
+         "properties": {
+            "administratorLogin": "[parameters('databaseLogin')]",
+            "administratorLoginPassword": "[parameters('databaseLoginPassword')]",
+            "version": "12.0"
+         },
+         "resources": [
+            {
+               "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
+               "name": "[parameters('databaseName')]",
+               "type": "databases",
+               "location": "[parameters('location')]",
+               "tags": {
+                  "displayName": "Database"
+               },
+               "sku": {
+                  "name": "[variables('dbSkuName')]",
+                  "capacity": "[if(variables('isDatabaseServerless'), parameters('serverlessDbCapacity'), json('null'))]"
+               },
+               "apiVersion": "2020-08-01-preview",
+               "dependsOn": [
+                  "[variables('sqlserverName')]"
+               ],
+               "properties": {
+                  "collation": "[parameters('collation')]",
+                  "maxSizeBytes": "[parameters('maxSizeBytes')]",
+                  "minCapacity": "[if(variables('isDatabaseServerless'), float(parameters('dbMinCapacity')), json('null'))]",
+                  "autoPauseDelay": "[if(variables('isDatabaseServerless'), parameters('autoPauseDelay'), json('null'))]"
+               }
+            },
+            {
+               "condition": "[equals(parameters('databaseNewOrExisting'), 'new')]",
+               "type": "firewallRules",
+               "apiVersion": "2019-06-01-preview",
+               "dependsOn": [
+                  "[variables('sqlserverName')]"
+               ],
+               "location": "[parameters('location')]",
+               "name": "AllowAllIps",
+               "properties": {
+                  "endIpAddress": "0.0.0.0",
+                  "startIpAddress": "0.0.0.0"
+               }
+            }
+         ]
+      }
+   ],
+   "outputs": {
+      "dbServerName": {
+         "type": "string",
+         "value": "[if(variables('isNewDatabase'), reference(variables('sqlserverName')).fullyQualifiedDomainName, parameters('databaseServerName'))]"
+      },
+      "dbName": {
+         "type": "string",
+         "value": "[parameters('databaseName')]"
+      },
+      "lbFqdn": {
+         "type": "string",
+         "value": "[if(variables('isAgPublicIPNew'), concat('https://', reference(variables('agPublicIPAddressID')).dnsSettings.fqdn), concat('https://', reference(variables('agPublicIPAddressID'), '2018-07-01').dnsSettings.fqdn))]"
+      },
+      //"dbrdpAddress": {
+       //  "type": "string",
+       //  "value": "[concat(reference(variables('dbpublicIPAddressName')).dnsSettings.fqdn, ':50000')]"
+      //},
+      "rdpAddress": {
+         "type": "string",
+         "value": "[concat(reference(variables('publicIPAddressName')).dnsSettings.fqdn, ':50000')]"
+      },
+      "offerId": {
+         "condition": "[not(variables('isCustomImage'))]",
+         "value": "[variables('imageOfferName')]",
+         "type": "string"
+      },
+      "scalesetName": {
+         "type": "string",
+         "value": "[variables('dbvmssName')]"
+      },
+      "skuId": {
+         "condition": "[not(variables('isCustomImage'))]",
+         "value": "[variables('imageSku')]",
+         "type": "string"
+      },
+      "customImageId": {
+         "condition": "[variables('isCustomImage')]",
+         "value": "[parameters('imageId')]",
+         "type": "string"
+      }
+   }
+}
