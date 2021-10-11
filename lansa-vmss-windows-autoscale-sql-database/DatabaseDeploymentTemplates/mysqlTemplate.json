@@ -209,7 +209,7 @@
                         "ignoreMissingVnetServiceEndpoint": true
                     },
                     "dependsOn": [
-                        "[concat('Microsoft.DBforMySQL/servers/', parameters('serverName'))]"
+                        "[resourceId('Microsoft.DBforMySQL/servers/', parameters('serverName'))]"
                     ]
                 },
                 {
@@ -217,7 +217,7 @@
                     "apiversion": "2017-12-01",
                     "name": "[concat(parameters('serverName'), '/', parameters('databaseName'))]",
                     "dependsOn": [
-                        "[concat('Microsoft.DBforMySQL/servers/', parameters('serverName'))]"
+                        "[resourceId('Microsoft.DBforMySQL/servers/', parameters('serverName'))]"
                     ],
                     "properties": {
                         "charset": "utf8",
@@ -232,7 +232,7 @@
             "apiVersion": "2017-12-01",
             "location": "[parameters('location')]",
             "dependsOn": [
-                "[concat('Microsoft.DBforMySQL/servers/', parameters('serverName'))]"
+                "[resourceId('Microsoft.DBforMySQL/servers/', parameters('serverName'))]"
             ],
             "copy": {
                 "name": "firewallRulesCopy",
