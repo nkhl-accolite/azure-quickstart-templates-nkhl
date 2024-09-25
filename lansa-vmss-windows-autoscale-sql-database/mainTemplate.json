@@ -96,12 +96,11 @@
       "applicationGatewaySkuTier": {
          "type": "string",
          "allowedValues": [
-            "Standard",
             "Standard_v2",
             "WAF",
             "WAF_v2"
          ],
-         "defaultValue": "Standard",
+         "defaultValue": "Standard_v2",
          "metadata": {
             "description": "Application Gateway SKU Tier"
          }
@@ -109,13 +108,11 @@
       "applicationGatewaySkuName": {
          "type": "string",
          "allowedValues": [
-            "Standard_Small",
-            "Standard_Medium",
-            "Standard_Large",
+            "Standard_v2",
             "WAF_Medium",
             "WAF_Large"
          ],
-         "defaultValue": "Standard_Medium",
+         "defaultValue": "Standard_v2",
          "metadata": {
             "description": "Application Gateway SKU Name"
          }
@@ -495,7 +492,7 @@
    },
    "variables": {
       "isCustomImage": "[equals(parameters('imageSource'), 'Custom')]",
-      "addAGName" : "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))]",
+      "addAGName" : "[or(equals(parameters('applicationGatewaySkuTier'), 'Standard_v2'), equals(parameters('applicationGatewaySkuTier'), 'WAF'))]",
       "autoScaleConfig" : {
          "minCapacity": "[parameters('autoScaleMinCapacity')]",
          "maxCapacity": "[parameters('autoScaleMaxCapacity')]"
@@ -1310,10 +1307,6 @@
          "type": "string",
          "value": "[if(variables('isAgPublicIPNew'), concat('https://', reference(variables('agPublicIPAddressID')).dnsSettings.fqdn), concat('https://', reference(variables('agPublicIPAddressID'), '2018-07-01').dnsSettings.fqdn))]"
       },
-      //"dbrdpAddress": {
-       //  "type": "string",
-       //  "value": "[concat(reference(variables('dbpublicIPAddressName')).dnsSettings.fqdn, ':50000')]"
-      //},
       "rdpAddress": {
          "type": "string",
          "value": "[concat(reference(variables('publicIPAddressName')).dnsSettings.fqdn, ':50000')]"

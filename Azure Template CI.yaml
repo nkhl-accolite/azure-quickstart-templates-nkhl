@@ -1,0 +1,326 @@
+name: Template-CI-$(Build.BuildId)
+
+variables:
+- group: 'Template Parameters'
+- group: 'SKU Versions'
+- group: 'Default Branch' 
+- group: 'Azure Logins'
+- name: CookbooksSource 
+  value: $(Build.Repository.LocalPath)\cookbooks
+- name: ForceDeploy
+  value: false
+- name: skipComponentGovernanceDetection
+  value: true
+- name: ttk.asset.filename
+  value: AzTemplateToolKit.zip
+- name: ttk.folder
+  value: $(Agent.BuildDirectory)\test
+
+trigger: none
+
+pr: none
+
+jobs:
+- job: Job_1
+  displayName: 'Agent job: Template Tests'
+  pool:
+    vmImage: windows-2019
+
+  steps:
+  - checkout: self
+  - task: PowerShell@2
+    displayName: Download TTK & Expand Files
+    enabled: False
+    inputs:
+      targetType: inline
+      script: >
+        New-Item -Path $(ttk.folder) -ItemType Directory -verbose
+
+        Invoke-WebRequest -Uri "https://aka.ms/arm-ttk-marketplace" -OutFile "$(ttk.folder)\$(ttk.asset.filename)" -verbose
+
+
+        # Expand the TTK files
+
+        Get-ChildItem "$(ttk.folder)" -Recurse
+
+        Write-Host "Expanding files..."
+
+        Expand-Archive -Path "$(ttk.folder)\*.zip" -DestinationPath "$(ttk.folder)" -Verbose
+
+        Write-Host "Expanded files found:"
+
+        Get-ChildItem "$(ttk.folder)" -Recurse
+      pwsh: true
+  - task: PowerShell@2
+    displayName: Get Folder
+    enabled: False
+    inputs:
+      targetType: inline
+      script: >+
+        # set this to a folder in the repo
+
+        $fullpath = "$env:BUILD_SOURCESDIRECTORY\lansa-vmss-windows-autoscale-sql-database"
+
+
+        Write-Host "##vso[task.setvariable variable=sample.folder]$fullpath"
+
+      pwsh: true
+  - task: PowerShell@2
+    displayName: Run Best Practice Tests
+    enabled: False
+    inputs:
+      targetType: inline
+      script: "Import-Module $(ttk.folder)/arm-ttk/arm-ttk.psd1 -Verbose\n $testOutput = @(Test-AzTemplate -TemplatePath \"$(sample.folder)\\\\createUIDefinitionDev\")\n\n $testOutput += @(Test-AzTemplate -TemplatePath \"$(sample.folder)\\\\createUIDefinitionTest\")\n\n $testOutput += @(Test-AzTemplate -TemplatePath \"$(sample.folder)\\\\createUIDefinitionSmall\")\n\n $testOutput += @(Test-AzTemplate -TemplatePath \"$(sample.folder)\\\\createUIDefinitionMedium\")\n\n $testOutput += @(Test-AzTemplate -TemplatePath \"$(sample.folder)\\\\createUIDefinitionLarge\")\n\n$testOutput\n\nif ($testOutput | ? {$_.Errors }) {\n   exit 1 \n} else {\n    Write-Host \"##vso[task.setvariable variable=result.best.practice]$true\"\n    exit 0\n}\n"
+      errorActionPreference: continue
+      failOnStderr: true
+      pwsh: true
+  - task: AzureResourceManagerTemplateDeployment@3
+    displayName: 'Deploy ARM Template : BakingDP-TemplateTest'
+    condition: or(succeeded(), eq(variables['ForceDeploy'], 'True'))
+    inputs:
+      ConnectedServiceName: $(ConnectedServiceName)
+      subscriptionName: 739c4e86-bd75-4910-8d6e-d7eb23ab94f3
+      resourceGroupName: BakingDP-TemplateTest-$(Build.BuildNumber)
+      location: Australia East
+      csmFile: lansa-vmss-windows-autoscale-sql-database/mainTemplate.json
+      overrideParameters: -osName "Windows Server 2012" -lansaVersion "V14 SP2" -msiURL $(msiURLv142) -stackName "build-$(Build.BuildNumber)" -certificateBase64Encoded "$(certificateBase64Encoded)" -certificatePassword "$(certificatePassword)" -databaseLogin "$(databaseLogin)" -databaseLoginPassword "$(databaseLoginPassword)" -adminUsername "$(adminUsername)" -adminPassword "$(adminPassword)" -webUsername "$(webUsername)" -webPassword "$(webPassword)" -gitBranch "debug/paas" -agpublicIpSku Standard -agpublicIpAllocationMethod Static
+      deploymentName: TestTemplate
+      deploymentOutputs: deploymentOutput
+      addSpnToEnvironment: true
+  - task: maikvandergaag.maikvandergaag-azurergtag.azurergtag.azurergtag@1
+    displayName: Azure Resource Group Tagging
+    condition: always()
+    continueOnError: True
+    inputs:
+      ConnectedServiceName: $(ConnectedServiceName)
+      ResourceGroupName: BakingDP-TemplateTest-$(Build.BuildNumber)
+      Key: Usage
+      Value: test-temp
+  - task: PowerShell@2
+    displayName: Print Deployment Output
+    condition: or(succeeded(), eq(variables['ForceDeploy'], 'True'))
+    inputs:
+      targetType: inline
+      script: >-
+        # Print the Deployment Output
+
+        Write-Host "$(deploymentOutput)" | out-default | Write-Verbose
+  - task: PowerShell@2
+    displayName: 'Test ARM Deployment : URL Tests'
+    condition: or(succeeded(), eq(variables['ForceDeploy'], 'True'))
+    inputs:
+      targetType: inline
+      script: >-
+        # Use the deployment output to extract the IpAddress
+
+        $deploymentOutput=ConvertFrom-Json '$(deploymentOutput)'
+
+        $IpAddress = $deploymentOutput.lbFqdn.value
+
+        $url1 = "$IpAddress/cgi-bin/probe"
+
+        $url2 = "$IpAddress/cgi-bin/lansaweb?about"
+
+        $url3 = "$IpAddress/cgi-bin/lansaweb?wam=DEPTABWA&webrtn=BuildFirst&ml=LANSA:XHTML&part=DEX&lang=ENG"
+
+        $url4 = "$IpAddress/cgi-bin/lansaweb?wam=JSMLICE&webrtn=weblic&ml=LANSA:XHTML&part=DEX&lang=ENG"
+
+        $urls = @($url1, $url2, $url3, $url4)
+
+        add-type @"
+            using System.Net;
+            using System.Security.Cryptography.X509Certificates;
+            public class TrustAllCertsPolicy : ICertificatePolicy {
+                public bool CheckValidationResult(
+                    ServicePoint srvPoint, X509Certificate certificate,
+                    WebRequest request, int certificateProblem) {
+                    return true;
+                }
+            }
+        "@
+
+        [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+
+        $failureCount = 0
+
+        forEach($url in $urls) {
+            try{
+                $response = Invoke-WebRequest -Uri $url -TimeoutSec 14
+                $ResponseCode = $response.StatusCode
+                if($ResponseCode -ne 200) {
+                    Write-Host "Response code not equal to 200: $ResponseCode" | Out-Default | Write-Verbose
+                    $failureCount = $failureCount + 1
+                } else {
+                    Write-Host $ResponseCode | Out-Default | Write-Verbose
+                }
+            } catch {
+                Write-Host $_.Exception | Out-Default | Write-Verbose
+                $ResponseCode = $_.Exception.Response.StatusCode.Value__
+                $failureCount = $failureCount + 1
+                Write-Host $ResponseCode | Out-Default | Write-Verbose
+            }
+        }
+
+        if($failureCount) {
+            Write-Host "Request failed for $($failureCount) URL(s)"
+            throw "The deployment failed the URL tests"
+        } else {
+            Write-Host "Successfully tested all URL(s)"
+        }
+  - task: AzurePowerShell@5
+    displayName: 'Azure PowerShell : Test Image Version w12r2d-14-2 Prod'
+    condition: or(succeeded(), eq(variables['ForceDeploy'], 'True'))
+    inputs:
+      ConnectedServiceNameARM: $(ConnectedServiceName)
+      ScriptType: InlineScript
+      Inline: >-
+        Install-Module -Name Az.Compute -AllowClobber -Force
+
+        $SkuName = "w12r2d-14-2-$(TestVersion-w12r2d-14-2)"
+
+
+        $var=ConvertFrom-Json '$(deploymentOutput)'
+
+
+        # Download TestImageVersion PS Script
+
+        New-Item -Path "$(CookbooksSource)\Tests\Tests" -ItemType Directory -verbose
+
+        Invoke-WebRequest -Uri "https://raw.githubusercontent.com/robe070/cookbooks/$(CookbooksBranch)/Tests/TestImageVersion.ps1" -OutFile "$(CookbooksSource)\Tests\TestImageVersion.ps1" -verbose
+
+
+        $vmssName = $var.scalesetName.value
+
+        Write-Host $vmssName | Out-Default
+
+         # Execute the TestImageVersion PS Script
+        Write-Host "Test the image version $SkuName by executing the script in the VMSS $vmssName" | Out-Default | Write-Verbose
+
+        $result = Invoke-AzVmssVMRunCommand -ResourceGroupName "BakingDP-TemplateTest-$(Build.BuildNumber)" -VMScaleSetName $vmssName -InstanceId '0' -CommandId 'RunPowerShellScript' -ScriptPath "$(Build.Repository.LocalPath)\cookbooks\Tests\TestImageVersion.ps1" -Parameter @{ImgName = $SkuName}
+
+        $result | Out-Default | Write-Host
+
+        if ($result.Value[1].message -eq "") {
+            Write-Host "Tested the image version in the VMSS successfully."
+        } else {
+            throw $result.Value[1].message
+        }
+      TargetAzurePs: LatestVersion
+  - task: CopyFiles@2
+    displayName: 'Copy Files to: Artifact Staging Directory'
+    inputs:
+      SourceFolder: lansa-vmss-windows-autoscale-sql-database
+      Contents: '*.json'
+      TargetFolder: $(build.artifactstagingdirectory)
+      CleanTargetFolder: true
+      OverWrite: true
+  - task: ArchiveFiles@2
+    displayName: Archive Solution Template
+    inputs:
+      rootFolderOrFile: $(build.artifactstagingdirectory)
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(build.artifactstagingdirectory)/SolutionTemplate.zip
+      verbose: true
+  - task: CopyFiles@2
+    displayName: Copy mainTemplate.json File to temp directory
+    inputs:
+      SourceFolder: lansa-vmss-windows-autoscale-sql-database
+      Contents: mainTemplate.json
+      TargetFolder: $(build.artifactstagingdirectory)/temp
+      CleanTargetFolder: true
+      OverWrite: true
+  - task: CopyFiles@2
+    displayName: Copy createUiDefinition file for Dev shoe size in temp folder
+    inputs:
+      SourceFolder: lansa-vmss-windows-autoscale-sql-database/createUiDefinitionDev
+      Contents: '*.json'
+      TargetFolder: $(build.artifactstagingdirectory)/temp
+      OverWrite: true
+  - task: ArchiveFiles@2
+    displayName: Archive Solution Template for Dev shoe size
+    inputs:
+      rootFolderOrFile: $(build.artifactstagingdirectory)/temp
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(build.artifactstagingdirectory)/SolutionTemplateDev.zip
+      verbose: true
+  - task: CopyFiles@2
+    displayName: Replace createUiDefinition file for Test shoe size in temp folder
+    inputs:
+      SourceFolder: lansa-vmss-windows-autoscale-sql-database/createUiDefinitionTest
+      Contents: '*.json'
+      TargetFolder: $(build.artifactstagingdirectory)/temp
+      OverWrite: true
+  - task: ArchiveFiles@2
+    displayName: Archive Solution Template for Test shoe size
+    inputs:
+      rootFolderOrFile: $(build.artifactstagingdirectory)/temp
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(build.artifactstagingdirectory)/SolutionTemplateTest.zip
+      verbose: true
+  - task: CopyFiles@2
+    displayName: Replace createUiDefinition file for Small shoe size in temp folder
+    inputs:
+      SourceFolder: lansa-vmss-windows-autoscale-sql-database/createUiDefinitionSmall
+      Contents: '*.json'
+      TargetFolder: $(build.artifactstagingdirectory)/temp
+      OverWrite: true
+  - task: ArchiveFiles@2
+    displayName: Archive Solution Template for Small shoe size
+    inputs:
+      rootFolderOrFile: $(build.artifactstagingdirectory)/temp
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(build.artifactstagingdirectory)/SolutionTemplateSmall.zip
+      verbose: true
+  - task: CopyFiles@2
+    displayName: Replace createUiDefinition file for Medium shoe size in temp folder
+    inputs:
+      SourceFolder: lansa-vmss-windows-autoscale-sql-database/createUiDefinitionMedium
+      Contents: '*.json'
+      TargetFolder: $(build.artifactstagingdirectory)/temp
+      OverWrite: true
+  - task: ArchiveFiles@2
+    displayName: Archive Solution Template for Medium shoe size
+    inputs:
+      rootFolderOrFile: $(build.artifactstagingdirectory)/temp
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(build.artifactstagingdirectory)/SolutionTemplateMedium.zip
+      verbose: true
+  - task: CopyFiles@2
+    displayName: Replace createUiDefinition file for Large shoe size in temp folder
+    inputs:
+      SourceFolder: lansa-vmss-windows-autoscale-sql-database/createUiDefinitionLarge
+      Contents: '*.json'
+      TargetFolder: $(build.artifactstagingdirectory)/temp
+      OverWrite: true
+  - task: ArchiveFiles@2
+    displayName: Archive Solution Template for Large shoe size
+    inputs:
+      rootFolderOrFile: $(build.artifactstagingdirectory)/temp
+      includeRootFolder: false
+      sevenZipCompression: 5
+      archiveFile: $(build.artifactstagingdirectory)/SolutionTemplateLarge.zip
+      verbose: true
+  - task: DeleteFiles@1
+    displayName: Delete temp folder
+    inputs:
+      SourceFolder: $(build.artifactstagingdirectory)/temp
+      Contents: '*.json'
+      RemoveSourceFolder: true
+  - task: CopyFiles@2
+    displayName: 'Copy Database Creation Files to: Artifact Staging Directory'
+    inputs:
+      SourceFolder: lansa-vmss-windows-autoscale-sql-database
+      Contents: DatabaseDeploymentTemplates/*.json
+      TargetFolder: $(build.artifactstagingdirectory)
+      OverWrite: true
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: Solution Template'
+    inputs:
+      ArtifactName: Solution Template
+      FileCopyOptions: ''
+...
