@@ -212,7 +212,7 @@
             "dependsOn": [
                 "managedDiskResources",
                 "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
-                "[concat('Microsoft.Storage/storageAccounts/', parameters('diagnosticsStorageAccountName'))]"
+                "[concat('Microsoft.Storage/storageAccounts/', toLower(parameters('diagnosticsStorageAccountName')))]"
             ],
             "properties": {
                 "hardwareProfile": {
