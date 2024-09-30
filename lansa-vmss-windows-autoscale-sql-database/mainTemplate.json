@@ -110,7 +110,8 @@
          "allowedValues": [
             "Standard_v2",
             "WAF_Medium",
-            "WAF_Large"
+            "WAF_Large",
+            "WAF_v2"
          ],
          "defaultValue": "Standard_v2",
          "metadata": {
